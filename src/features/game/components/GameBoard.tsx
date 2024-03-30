@@ -30,11 +30,13 @@ const LittleBoard = observer(
     return (
       <BigCell>
         <Grid
-          sx={{
+          sx={(theme) => ({
             height: "100%",
             padding: 1,
-            backgroundColor: isValid ? "white" : "grey",
-          }}
+            backgroundColor: isValid
+              ? theme.palette.background.paper
+              : "lightgrey",
+          })}
         >
           {cells.board.map((c) => (
             <GameCell key={joinPosition(c.position)} cell={c} />
@@ -48,9 +50,11 @@ const LittleBoard = observer(
 const Grid = styled("div")({
   display: "grid",
   gridTemplateColumns: "repeat(3, 1fr)",
+  overflow: "hidden",
 });
 
 const FullBoard = styled(Grid)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
   height: "600px",
   width: "600px",
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
@@ -81,7 +85,7 @@ const GameCell = observer(({ cell }: { cell: Cell }) => {
           ? {
               cursor: "pointer",
               ":hover": {
-                backgroundColor: "lightgrey",
+                backgroundColor: (t) => t.palette.background.default,
               },
             }
           : undefined

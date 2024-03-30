@@ -49,20 +49,22 @@ const Container = styled("div")(({ theme }) => ({
   },
 }));
 
-const GameDetails = styled("div")({
+const GameDetails = styled("div")(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
   display: "flex",
-  backgroundColor: "white",
+  backgroundColor: theme.palette.background.paper,
   height: "120px",
   padding: 12,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
-});
+}));
 
-const MovesList = styled("div")({
-  backgroundColor: "white",
+const MovesList = styled("div")(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.paper,
   height: "fit-content",
   width: "200px",
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
-});
+}));
 
 const MoveRow = styled("div")({
   display: "flex",
@@ -76,9 +78,10 @@ const MovePair = styled("div")({
 });
 
 const MoveNumber = styled("div")(({ theme }) => ({
-  fontWeight: "bold",
+  color: theme.palette.text.secondary,
+  // fontWeight: "bold",
   marginRight: 8,
-  background: "lightgrey",
+  backgroundColor: theme.palette.background.default,
   padding: "4px 16px",
   width: "40px",
 }));

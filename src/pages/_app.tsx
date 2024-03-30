@@ -6,9 +6,8 @@ import { sessionStore } from "@/stores/session";
 import { trpc } from "@/utils/trpc";
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
-import { ThemeProvider, createTheme } from "@mui/material";
-
-const materialTheme = createTheme();
+import { ThemeProvider } from "@mui/material";
+import { theme } from "@/utils/theme";
 
 function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -17,7 +16,7 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <AppCacheProvider>
-      <ThemeProvider theme={materialTheme}>
+      <ThemeProvider theme={theme}>
         <Component {...pageProps} />
       </ThemeProvider>
     </AppCacheProvider>

@@ -27,20 +27,20 @@ export const PageLayout = observer(
   }
 );
 
-const Page = styled("div")({
+const Page = styled("div")(({ theme }) => ({
   height: "100vh",
   display: "flex",
   flexDirection: "column",
-  backgroundColor: "lightgrey",
-});
+  backgroundColor: theme.palette.background.default,
+}));
 
-const Header = styled("div")({
-  backgroundColor: "lightgrey",
+const Header = styled("div")(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
   padding: "12px 24px",
   display: "flex",
   justifyContent: "space-between",
   marginBottom: 24,
-});
+}));
 
 const Content = styled("div")(({ theme }) => ({
   [theme.breakpoints.up("md")]: {
