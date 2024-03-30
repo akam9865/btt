@@ -53,6 +53,7 @@ const Grid = styled("div")({
 const FullBoard = styled(Grid)(({ theme }) => ({
   height: "600px",
   width: "600px",
+  boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
 
   [theme.breakpoints.down("sm")]: {
     aspectRatio: "1 / 1",

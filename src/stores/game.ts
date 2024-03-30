@@ -1,3 +1,4 @@
+import { joinPosition } from "@/features/game/utils/utils";
 import { MoveSchema } from "@/utils/schema/MovesSchema";
 import { supabase } from "@/utils/supabase";
 import { trpcClient } from "@/utils/trpc";
@@ -103,6 +104,19 @@ class GameStore {
     const overallWinner = null; // getWinnerForBoard(resultSymbols);
     if (overallWinner) return overallWinner;
     return null;
+  }
+
+  get formattedMoves() {
+    const formattedMoves = [];
+    const i = 0;
+    for (let i = 0; i < this.moves.length; i += 2) {
+      const [xMove, oMove] = this.moves.slice(i, i + 2);
+      const turnNumber = Math.floor(i / 2) + 1;
+      const x = joinPosition(xMove.position);
+      const o = oMove ? joinPosition(oMove.position) : undefined;
+      formattedMoves.push({ moves: { x, o }, turnNumber });
+    }
+    return formattedMoves;
   }
 
   canClick(position: Position, playerId: string) {
