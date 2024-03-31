@@ -70,6 +70,7 @@ const GameCell = observer(({ cell }: { cell: Cell }) => {
   const { position } = cell;
   const { uuid: playerId } = sessionStore;
   const canClick = gameStore.canClick(position, playerId);
+  const isLastMove = gameStore.isLastMove(position);
 
   const handleClick = () => {
     if (!canClick) return;
@@ -88,7 +89,9 @@ const GameCell = observer(({ cell }: { cell: Cell }) => {
                 backgroundColor: (t) => t.palette.background.default,
               },
             }
-          : undefined
+          : isLastMove
+          ? { backgroundColor: "#FFF6C3" }
+          : {}
       }
     >
       {cell.symbol}&nbsp;
