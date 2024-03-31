@@ -13,7 +13,6 @@ type GoogleUser = {
 
 export function ProfileButton() {
   const { data, status } = useSession();
-  console.log(data);
 
   if (status === "authenticated") {
     return <UserPopover user={data.user} />;
