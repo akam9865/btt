@@ -8,6 +8,7 @@ import type { AppProps } from "next/app";
 import { useEffect } from "react";
 import { ThemeProvider } from "@mui/material";
 import { theme } from "@/utils/theme";
+import { SessionProvider } from "next-auth/react";
 
 function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -17,7 +18,9 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <AppCacheProvider>
       <ThemeProvider theme={theme}>
-        <Component {...pageProps} />
+        <SessionProvider>
+          <Component {...pageProps} />
+        </SessionProvider>
       </ThemeProvider>
     </AppCacheProvider>
   );

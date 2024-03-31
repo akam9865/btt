@@ -1,13 +1,13 @@
-import { sessionStore } from "@/stores/session";
 import { styled } from "@mui/system";
 import { observer } from "mobx-react-lite";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
+import { ProfileButton } from "./Profile";
+
 export const PageLayout = observer(
   ({ children }: { children: React.ReactNode }) => {
-    const { uuid } = sessionStore;
     return (
       <>
         <Head>
@@ -26,7 +26,7 @@ export const PageLayout = observer(
                 height={40}
               />
             </Link>
-            <div>{uuid}</div>
+            <ProfileButton />
           </Header>
           <Content>{children}</Content>
         </Page>
