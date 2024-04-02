@@ -2,15 +2,17 @@ import { observer } from "mobx-react-lite";
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { sessionStore } from "@/stores/session";
+import { useSession } from "next-auth/react";
 
 export const LobbyPage = observer(() => {
   const mutation = trpc.findGame.useMutation();
   const router = useRouter();
+  const { data } = useSession();
+  const user = data?.user as { id: string } | undefined;
 
   const handleCreateGame = () => {
-    if (!sessionStore.uuid) return;
-    mutation.mutate({ playerId: sessionStore.uuid });
+    if (!user?.id) return;
+    mutation.mutate({ playerId: user.id });
   };
 
   useEffect(() => {

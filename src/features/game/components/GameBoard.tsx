@@ -1,9 +1,9 @@
 import { Cell, gameStore, TicTacToe } from "@/stores/game";
-import { sessionStore } from "@/stores/session";
 import { observer } from "mobx-react-lite";
 
 import { styled } from "@mui/material";
 import { joinPosition } from "../utils/utils";
+import { useSession } from "next-auth/react";
 
 export const GameBoard = observer(() => {
   const { smartBoard, availableBoards } = gameStore;
@@ -68,14 +68,17 @@ const FullBoard = styled(Grid)(({ theme }) => ({
 
 const GameCell = observer(({ cell }: { cell: Cell }) => {
   const { position } = cell;
-  const { uuid: playerId } = sessionStore;
-  const canClick = gameStore.canClick(position, playerId);
+  const { data } = useSession();
+  const userId = data?.user.id;
+
+  const canClick = gameStore.canClick(position, userId);
   const isLastMove = gameStore.isLastMove(position);
 
   const handleClick = () => {
     if (!canClick) return;
+    if (!userId) return;
 
-    gameStore.move(playerId, position);
+    gameStore.move(userId, position);
   };
 
   return (

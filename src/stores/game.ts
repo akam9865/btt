@@ -88,22 +88,11 @@ class GameStore {
     return [littleBoardIndex];
   }
 
-  // results for each small board, e.g. [null, "X", "O", ..., null]
-  // big board index has null if there is no winner, or a symbol if someone has won
-  get boardResults() {
-    return this.smartBoard.map((littleBoard) => {
-      // return getWinnerForBoard(littleBoard.map((cell) => cell.symbol));
-      return null;
-    });
-  }
-
   get winner() {
-    // const resultSymbols = this.boardResults.map(
-    //   (result) => result?.symbol || null
-    // );
-    const overallWinner = null; // getWinnerForBoard(resultSymbols);
-    if (overallWinner) return overallWinner;
-    return null;
+    const boardResults = this.smartBoard.map(
+      (board) => board.winner?.symbol || null
+    );
+    return getWinnerForBoard(boardResults);
   }
 
   get formattedMoves() {
@@ -119,7 +108,9 @@ class GameStore {
     return formattedMoves;
   }
 
-  canClick(position: Position, playerId: string) {
+  canClick(position: Position, playerId?: string) {
+    if (!playerId) return false;
+
     const board = this.smartBoard[position.bigBoardIndex];
 
     if (board.board[position.littleBoardIndex].symbol) return false;
@@ -233,12 +224,6 @@ class GameStore {
         }
       )
       .subscribe();
-
-    // autorun(() => {
-    // console.log("------");
-    // console.log(this.lastMove);
-    // console.log(this.moves);
-    // });
 
     this.unsubscribe = () => {
       supabase.removeChannel(movesChannel);

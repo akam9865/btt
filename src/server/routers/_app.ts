@@ -8,9 +8,9 @@ export const appRouter = router({
   findGame: procedure
     .input(z.object({ playerId: z.string() }))
     .mutation(async (opts) => {
-      // return { gameId: "7" };
       const [game] =
         await sql`select * from games where player_o is null limit 1`;
+
       if (game) {
         await sql`UPDATE games SET player_o = ${opts.input.playerId} WHERE id = ${game.id}`;
         return { gameId: game.id };
@@ -43,11 +43,9 @@ export const appRouter = router({
   getMoves: procedure
     .input(z.object({ gameId: z.string() }))
     .query(async ({ input }) => {
-      const { gameId } = input;
+      const moves =
+        await sql`SELECT * FROM moves WHERE game_id = ${input.gameId}`;
 
-      const moves = await sql`SELECT * FROM moves WHERE game_id = ${gameId}`;
-
-      // console.log(moves);
       // const moves = [
       //   {
       //     id: "15",

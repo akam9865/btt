@@ -1,15 +1,11 @@
 import * as React from "react";
 import Popover from "@mui/material/Popover";
-import Typography from "@mui/material/Typography";
+
 import Button from "@mui/material/Button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { styled } from "@mui/material";
 import Image from "next/image";
-
-type GoogleUser = {
-  name?: string | null;
-  image?: string | null;
-};
+import { Session } from "next-auth";
 
 export function ProfileButton() {
   const { data, status } = useSession();
@@ -21,10 +17,11 @@ export function ProfileButton() {
   return <Button onClick={() => signIn()}>Sign In</Button>;
 }
 
-function UserPopover({ user }: { user?: GoogleUser }) {
+function UserPopover({ user }: { user?: Session["user"] }) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -57,11 +54,11 @@ function UserPopover({ user }: { user?: GoogleUser }) {
   );
 }
 
-const Profile = styled(Button)(({ theme }) => ({
+const Profile = styled(Button)({
   display: "flex",
   alignItems: "center",
   gap: 12,
-}));
+});
 
 const Avatar = ({ imageUrl }: { imageUrl?: string | null }) => {
   return imageUrl ? (
