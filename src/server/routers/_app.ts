@@ -2,7 +2,7 @@ import { z } from "zod";
 import { procedure, router } from "../trpc";
 import { sql } from "../supabase";
 import { MovesSchema } from "@/utils/schema/MovesSchema";
-import { GameSchema } from "@/utils/schema/GamesSchema";
+import { GameSchema } from "@/utils/schema/GameSchema";
 
 export const appRouter = router({
   findGame: procedure
@@ -27,21 +27,40 @@ export const appRouter = router({
       const { gameId } = input;
       const [game] = await sql`
         SELECT
-          games.id,
-          games.created_at,
-          x.id as x_id,
-          x.name as x_name,
-          x.image as x_image,
-          o.id as o_id,
-          o.name as o_name,
-          o.image as o_image
+          *
         FROM
           games
-          JOIN next_auth.users x ON games.player_x = x.id
-          JOIN next_auth.users o ON games.player_o = o.id
         WHERE
           games.id = ${gameId}
-`;
+      `;
+
+      const playerIds = [game.player_x, game.player_o].filter(Boolean);
+
+      const [data] = await Promise.all(
+        playerIds.map(
+          (id) => sql`SELECT * FROM next_auth.users WHERE id = ${id}`
+        )
+      );
+      const playerX = data[0] || null;
+      const playerO = data[1] || null;
+
+      //       const [game] = await sql`
+      //         SELECT
+      //           games.id,
+      //           games.created_at,
+      //           x.id as x_id,
+      //           x.name as x_name,
+      //           x.image as x_image,
+      //           o.id as o_id,
+      //           o.name as o_name,
+      //           o.image as o_image
+      //         FROM
+      //           games
+      //           JOIN next_auth.users x ON games.player_x = x.id
+      //           JOIN next_auth.users o ON games.player_o = o.id
+      //         WHERE
+      //           games.id = ${gameId}
+      // `;
       // const game = {
       //   id: "7",
       //   gameId: "hi",
@@ -52,7 +71,11 @@ export const appRouter = router({
       //   end_time: null,
       // };
 
-      return GameSchema.parse(game);
+      return GameSchema.parse({
+        ...game,
+        playerX,
+        playerO,
+      });
     }),
 
   getMoves: procedure

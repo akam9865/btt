@@ -52,6 +52,7 @@ type User = {
 class GameStore {
   gameId: string = "";
   createdAt?: Date;
+  // TODO: extract users to a separate store
   playerX: User = {};
   playerO: User = {};
   moves: Move[] = [];
