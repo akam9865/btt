@@ -3,6 +3,7 @@ import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { Button } from "@mui/material";
 
 export const LobbyPage = observer(() => {
   const mutation = trpc.findGame.useMutation();
@@ -24,7 +25,9 @@ export const LobbyPage = observer(() => {
   return (
     <div>
       {/* MyGames - get list of games I'm involved in and can join */}
-      <button onClick={handleCreateGame}>Find a Game</button>
+      <Button onClick={handleCreateGame} variant="outlined">
+        Find a Game
+      </Button>
     </div>
   );
 });
