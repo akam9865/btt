@@ -2,12 +2,14 @@ import { gameStore } from "@/stores/game";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { GameBoard } from "./GameBoard";
-import { joinPosition } from "../utils/utils";
 import { Box, styled } from "@mui/material";
+import { formatTimeSince } from "../utils/formatters";
+import { Link } from "@/features/core/ui/Link";
 
 type GameProps = { gameId: string };
 
 export const GamePage = observer(({ gameId }: GameProps) => {
+  const { createdAt, playerX, playerO, winner } = gameStore;
   useEffect(() => {
     gameStore.loadGame(gameId);
     gameStore.subscribe(gameId);
@@ -16,9 +18,20 @@ export const GamePage = observer(({ gameId }: GameProps) => {
   return (
     <Container>
       <GameDetails>
-        X: {gameStore.playerX}
-        <br />
-        O: {gameStore.playerO}
+        <Header>
+          <div>Friendly Game</div>
+          {formatTimeSince(createdAt)}
+        </Header>
+        <UserRow>
+          <div>X</div>
+          <Link href={`/user/${playerX.id}`}>{playerX.name}</Link>
+        </UserRow>
+        <UserRow>
+          <div>O</div>
+          <Link href={`/user/${playerO.id}`}>{playerO.name}</Link>
+        </UserRow>
+
+        {winner && <Result>{winner.symbol} Wins</Result>}
       </GameDetails>
 
       <GameBoard />
@@ -40,6 +53,26 @@ export const GamePage = observer(({ gameId }: GameProps) => {
   );
 });
 
+const Result = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  borderTop: `1px solid ${theme.palette.divider}`,
+  marginTop: 12,
+  paddingTop: 12,
+}));
+
+const Header = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  marginBottom: 12,
+}));
+
+const UserRow = styled("div")(({ theme }) => ({
+  display: "flex",
+  gap: 8,
+  alignItems: "center",
+}));
+
 const Container = styled("div")(({ theme }) => ({
   gap: 24,
   display: "flex",
@@ -53,7 +86,9 @@ const GameDetails = styled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   display: "flex",
   backgroundColor: theme.palette.background.paper,
-  height: "120px",
+  width: 240,
+  flexDirection: "column",
+  height: "fit-content",
   padding: 12,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
 }));
@@ -62,7 +97,7 @@ const MovesList = styled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   backgroundColor: theme.palette.background.paper,
   height: "fit-content",
-  width: "200px",
+  width: 240,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
 }));
 
@@ -78,8 +113,7 @@ const MovePair = styled("div")({
 });
 
 const MoveNumber = styled("div")(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  // fontWeight: "bold",
+  color: "grey",
   marginRight: 8,
   backgroundColor: theme.palette.background.default,
   padding: "4px 16px",

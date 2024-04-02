@@ -25,8 +25,23 @@ export const appRouter = router({
     .input(z.object({ gameId: z.string() }))
     .query(async ({ input }) => {
       const { gameId } = input;
-      const [game] = await sql`SELECT * FROM games WHERE id = ${gameId}`;
-
+      const [game] = await sql`
+        SELECT
+          games.id,
+          games.created_at,
+          x.id as x_id,
+          x.name as x_name,
+          x.image as x_image,
+          o.id as o_id,
+          o.name as o_name,
+          o.image as o_image
+        FROM
+          games
+          JOIN next_auth.users x ON games.player_x = x.id
+          JOIN next_auth.users o ON games.player_o = o.id
+        WHERE
+          games.id = ${gameId}
+`;
       // const game = {
       //   id: "7",
       //   gameId: "hi",

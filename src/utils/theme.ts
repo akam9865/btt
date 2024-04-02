@@ -1,5 +1,6 @@
 import { createTheme } from "@mui/material";
 
+// TODO: devise theme
 export const theme = createTheme({
   palette: {
     mode: "light",
@@ -12,6 +13,10 @@ export const theme = createTheme({
     background: {
       default: "#ECECEC",
       paper: "#FFF",
+    },
+    text: {
+      primary: "#000",
+      secondary: "#1b78d0",
     },
   },
   shape: {

@@ -43,10 +43,17 @@ type BigBoard = [
   TicTacToe
 ];
 
+type User = {
+  id?: string;
+  name?: string;
+  image?: string;
+};
+
 class GameStore {
   gameId: string = "";
-  playerX: string = "";
-  playerO: string = "";
+  createdAt?: Date;
+  playerX: User = {};
+  playerO: User = {};
   moves: Move[] = [];
   smartBoard: BigBoard;
 
@@ -62,8 +69,8 @@ class GameStore {
     return this.moves.length % 2 === 0 ? "X" : "O";
   }
 
-  get playerTurn(): string {
-    return this.turn === "X" ? this.playerX : this.playerO;
+  get playerTurn(): string | undefined {
+    return this.turn === "X" ? this.playerX.id : this.playerO.id;
   }
 
   get lastMove(): Move | undefined {
@@ -110,6 +117,7 @@ class GameStore {
 
   canClick(position: Position, playerId?: string) {
     if (!playerId) return false;
+    if (this.winner) return false;
 
     const board = this.smartBoard[position.bigBoardIndex];
 
@@ -157,7 +165,7 @@ class GameStore {
 
       yield trpcClient.saveMove.mutate({
         gameId,
-        playerId,
+        playerId: playerTurn,
         symbol: moveSymbol,
         bigBoardIndex,
         littleBoardIndex,
@@ -182,6 +190,7 @@ class GameStore {
     this.gameId = game.id;
     this.playerO = game.playerO;
     this.playerX = game.playerX;
+    this.createdAt = game.createdAt;
     this.moves = moves;
 
     moves.forEach((move: Move) => {
