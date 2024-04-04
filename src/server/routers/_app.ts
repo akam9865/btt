@@ -7,16 +7,24 @@ import { GameSchema } from "@/utils/schema/GameSchema";
 export const appRouter = router({
   findGame: procedure
     .input(z.object({ playerId: z.string() }))
-    .mutation(async (opts) => {
+    .mutation(async ({ input }) => {
+      const [existingGame] = await sql`
+        SELECT * FROM games WHERE player_o IS NULL AND player_x = ${input.playerId} LIMIT 1
+      `;
+
+      if (existingGame) {
+        return { gameId: existingGame.id };
+      }
+
       const [game] =
-        await sql`select * from games where player_o is null limit 1`;
+        await sql`select * from games where player_o is null and player_x != ${input.playerId} limit 1`;
 
       if (game) {
-        await sql`UPDATE games SET player_o = ${opts.input.playerId} WHERE id = ${game.id}`;
+        await sql`UPDATE games SET player_o = ${input.playerId} WHERE id = ${game.id}`;
         return { gameId: game.id };
       } else {
         const [newGame] =
-          await sql`INSERT INTO games (player_x) VALUES (${opts.input.playerId}) RETURNING *`;
+          await sql`INSERT INTO games (player_x) VALUES (${input.playerId}) RETURNING *`;
         return { gameId: newGame.id };
       }
     }),
@@ -34,15 +42,17 @@ export const appRouter = router({
           games.id = ${gameId}
       `;
 
-      const playerIds = [game.player_x, game.player_o].filter(Boolean);
+      // TODO separate user query from game query
+      const playerIds = [game.player_x, game.player_o];
 
-      const [data] = await Promise.all(
-        playerIds.map(
-          (id) => sql`SELECT * FROM next_auth.users WHERE id = ${id}`
+      const [p1, p2] = await Promise.all(
+        playerIds.map((id) =>
+          id ? sql`SELECT * FROM next_auth.users WHERE id = ${id}` : undefined
         )
       );
-      const playerX = data[0] || null;
-      const playerO = data[1] || null;
+
+      const playerX = p1?.at(0) || null;
+      const playerO = p2?.at(0) || null;
 
       //       const [game] = await sql`
       //         SELECT
