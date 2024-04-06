@@ -1,11 +1,10 @@
 import { joinPosition } from "@/features/game/utils/utils";
-import { MoveSchema } from "@/utils/schema/MovesSchema";
+import { MoveSchema, type Move } from "@/utils/schema/MovesSchema";
 import { supabase } from "@/utils/supabase";
 import { trpcClient } from "@/utils/trpc";
 import assert from "assert";
 import {
   action,
-  autorun,
   flow,
   makeAutoObservable,
   makeObservable,
@@ -21,15 +20,7 @@ import {
 const BOARD_INDICES: PositionIndex[] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
 type PositionIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-export type Position = {
-  bigBoardIndex: PositionIndex;
-  littleBoardIndex: PositionIndex;
-};
-
-type Move = {
-  position: Position;
-  symbol: "X" | "O";
-};
+export type Position = Move["position"];
 
 type BigBoard = [
   TicTacToe,
@@ -53,8 +44,8 @@ class GameStore {
   gameId: string = "";
   createdAt?: Date;
   // TODO: extract users to a separate store
-  playerX: User = {};
-  playerO: User = {};
+  playerX?: User;
+  playerO?: User;
   moves: Move[] = [];
   smartBoard: BigBoard;
 
@@ -71,6 +62,7 @@ class GameStore {
   }
 
   get playerTurn(): string | undefined {
+    if (!this.playerX || !this.playerO) return undefined;
     return this.turn === "X" ? this.playerX.id : this.playerO.id;
   }
 
@@ -162,7 +154,7 @@ class GameStore {
     assert(playerId, "playerId required");
 
     try {
-      this.applyMove(position, moveSymbol);
+      this.applyMove({ position, symbol: moveSymbol, playerId });
 
       yield trpcClient.saveMove.mutate({
         gameId,
@@ -176,29 +168,38 @@ class GameStore {
     }
   });
 
-  applyMove(position: Position, symbol: "X" | "O") {
+  applyMove(move: Move) {
+    const { position, symbol } = move;
     const { bigBoardIndex, littleBoardIndex } = position;
-    this.smartBoard[bigBoardIndex].move(littleBoardIndex, this.turn);
-    this.moves.push({ position, symbol });
+    this.smartBoard[bigBoardIndex].move(littleBoardIndex, symbol);
+    this.moves.push(move);
   }
 
-  loadGame = flow(function* loadGame(this: GameStore, gameId: string) {
-    const [game, moves] = yield Promise.all([
-      trpcClient.getGame.query({ gameId }),
-      trpcClient.getMoves.query({ gameId }),
-    ]);
+  // trpc client isn't behaving well with yield, using async/await + runInAction where type safety is important
+  async loadGame(gameId: string) {
+    try {
+      this.gameId = gameId;
 
-    this.gameId = game.id;
-    this.playerO = game.playerO;
-    this.playerX = game.playerX;
-    this.createdAt = game.createdAt;
-    this.moves = moves;
+      const [game, moves] = await Promise.all([
+        trpcClient.getGame.query({ gameId }),
+        trpcClient.getMoves.query({ gameId }),
+      ]);
 
-    moves.forEach((move: Move) => {
-      const { bigBoardIndex, littleBoardIndex } = move.position;
-      this.smartBoard[bigBoardIndex].move(littleBoardIndex, move.symbol);
-    });
-  });
+      runInAction(() => {
+        this.playerO = game.playerO || undefined;
+        this.playerX = game.playerX || undefined;
+        this.createdAt = new Date(game.createdAt);
+        this.moves = moves;
+
+        moves.forEach((move: Move) => {
+          const { bigBoardIndex, littleBoardIndex } = move.position;
+          this.smartBoard[bigBoardIndex].move(littleBoardIndex, move.symbol);
+        });
+      });
+    } catch {
+      // do something
+    }
+  }
 
   // createGame = flow(function* createGame() {});
   // requestGame = flow(function* requestGame() {});
@@ -218,8 +219,8 @@ class GameStore {
           filter: `game_id=eq.${gameId}`,
         },
         (payload) => {
-          const { position, symbol } = MoveSchema.parse(payload.new);
-          const { bigBoardIndex, littleBoardIndex } = position;
+          const move = MoveSchema.parse(payload.new);
+          const { bigBoardIndex, littleBoardIndex } = move.position;
 
           const hasMove = this.moves.find((existingMove) => {
             return (
@@ -229,7 +230,7 @@ class GameStore {
           });
 
           if (!hasMove) {
-            this.applyMove(position, symbol);
+            this.applyMove(move);
           }
         }
       )
@@ -275,9 +276,9 @@ export class TicTacToe {
     return false;
   }
 
-  move = (position: PositionIndex, symbol: "X" | "O") => {
+  move(position: PositionIndex, symbol: "X" | "O") {
     this.board[position].symbol = symbol;
-  };
+  }
 }
 
 export const gameStore = new GameStore();

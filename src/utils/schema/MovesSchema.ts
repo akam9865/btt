@@ -29,3 +29,4 @@ export const MoveSchema = z
   }));
 
 export const MovesSchema = z.array(MoveSchema);
+export type Move = z.infer<typeof MoveSchema>;
