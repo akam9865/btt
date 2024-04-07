@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 
 import { styled } from "@mui/material";
 import { joinPosition } from "../utils/utils";
-import { useSession } from "next-auth/react";
+import { useUserId } from "@/hooks/useUserId";
 
 export const GameBoard = observer(() => {
   const { smartBoard, availableBoards } = gameStore;
@@ -68,8 +68,7 @@ const FullBoard = styled(Grid)(({ theme }) => ({
 
 const GameCell = observer(({ cell }: { cell: Cell }) => {
   const { position } = cell;
-  const { data } = useSession();
-  const userId = data?.user.id;
+  const userId = useUserId();
 
   const canClick = gameStore.canClick(position, userId);
   const isLastMove = gameStore.isLastMove(position);
