@@ -3,8 +3,37 @@ import { procedure, router } from "../trpc";
 import { sql } from "../supabase";
 import { MovesSchema } from "@/utils/schema/MovesSchema";
 import { GameSchema } from "@/utils/schema/GameSchema";
+import { UserSchema } from "@/utils/schema/UserSchema";
+
+// abstraction
+//  findGame(playerId) => gameId - look for a joinable game or create a new one
+//  getGame -
 
 export const appRouter = router({
+  getUser: procedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      console.log(input.userId);
+
+      const [user] = await sql`
+        SELECT * FROM next_auth.users WHERE id = ${input.userId}
+      `;
+
+      return UserSchema.parse(user);
+    }),
+  createGame: procedure
+    .input(z.object({ playerId: z.string(), symbol: z.string() }))
+    .mutation(async ({ input }) => {
+      const query =
+        input.symbol === "X"
+          ? sql`INSERT INTO games (player_x) VALUES (${input.playerId}) RETURNING *`
+          : sql`INSERT INTO games (player_o) VALUES (${input.playerId}) RETURNING *`;
+
+      const [newGame] = await query;
+
+      return { gameId: newGame.id };
+    }),
+
   findGame: procedure
     .input(z.object({ playerId: z.string() }))
     .mutation(async ({ input }) => {
@@ -29,6 +58,16 @@ export const appRouter = router({
       }
     }),
 
+  getGames: procedure
+    .input(z.object({ playerId: z.optional(z.string()) }))
+    .query(async ({ input }) => {
+      const games = await sql`
+        SELECT * FROM games
+      `;
+
+      return games.map((game) => GameSchema.parse(game));
+    }),
+
   getGame: procedure
     .input(z.object({ gameId: z.string() }))
     .query(async ({ input }) => {
@@ -42,50 +81,7 @@ export const appRouter = router({
           games.id = ${gameId}
       `;
 
-      // TODO separate user query from game query
-      const playerIds = [game.player_x, game.player_o];
-
-      const [p1, p2] = await Promise.all(
-        playerIds.map((id) =>
-          id ? sql`SELECT * FROM next_auth.users WHERE id = ${id}` : undefined
-        )
-      );
-
-      const playerX = p1?.at(0) || null;
-      const playerO = p2?.at(0) || null;
-
-      //       const [game] = await sql`
-      //         SELECT
-      //           games.id,
-      //           games.created_at,
-      //           x.id as x_id,
-      //           x.name as x_name,
-      //           x.image as x_image,
-      //           o.id as o_id,
-      //           o.name as o_name,
-      //           o.image as o_image
-      //         FROM
-      //           games
-      //           JOIN next_auth.users x ON games.player_x = x.id
-      //           JOIN next_auth.users o ON games.player_o = o.id
-      //         WHERE
-      //           games.id = ${gameId}
-      // `;
-      // const game = {
-      //   id: "7",
-      //   gameId: "hi",
-      //   created_at: "2024-03-19T00:34:02.386Z",
-      //   player_x: "7029e705-5edb-4520-841c-648b73492c45",
-      //   player_o: "f0df116b-b53c-4bea-aced-0b492572870d",
-      //   start_time: null,
-      //   end_time: null,
-      // };
-
-      return GameSchema.parse({
-        ...game,
-        playerX,
-        playerO,
-      });
+      return GameSchema.parse(game);
     }),
 
   getMoves: procedure
