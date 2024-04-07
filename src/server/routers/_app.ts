@@ -5,16 +5,10 @@ import { MovesSchema } from "@/utils/schema/MovesSchema";
 import { GameSchema } from "@/utils/schema/GameSchema";
 import { UserSchema } from "@/utils/schema/UserSchema";
 
-// abstraction
-//  findGame(playerId) => gameId - look for a joinable game or create a new one
-//  getGame -
-
 export const appRouter = router({
   getUser: procedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
-      console.log(input.userId);
-
       const [user] = await sql`
         SELECT * FROM next_auth.users WHERE id = ${input.userId}
       `;
@@ -32,6 +26,22 @@ export const appRouter = router({
       const [newGame] = await query;
 
       return { gameId: newGame.id };
+    }),
+  joinGame: procedure
+    .input(z.object({ playerId: z.string(), gameId: z.string() }))
+    .mutation(async ({ input }) => {
+      const query = sql`
+        UPDATE games
+        SET
+          player_o = CASE WHEN player_o IS NULL THEN ${input.playerId} ELSE player_o END,
+          player_x = CASE WHEN player_x IS NULL THEN ${input.playerId} ELSE player_x END
+        WHERE id = ${input.gameId}
+        RETURNING *
+      `;
+
+      const [game] = await query;
+
+      return { gameId: game.id };
     }),
 
   findGame: procedure
@@ -59,10 +69,24 @@ export const appRouter = router({
     }),
 
   getGames: procedure
-    .input(z.object({ playerId: z.optional(z.string()) }))
+    .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
       const games = await sql`
         SELECT * FROM games
+        WHERE (player_o = ${input.userId} AND player_x IS NOT NULL)
+        OR (player_x = ${input.userId} AND player_o IS NOT NULL)
+      `;
+
+      return games.map((game) => GameSchema.parse(game));
+    }),
+
+  getJoinableGames: procedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      const games = await sql`
+        SELECT * FROM games
+        WHERE (player_o IS NULL AND player_x IS NOT NULL AND player_x != ${input.userId})
+        OR (player_x IS NULL AND player_o IS NOT NULL AND player_o != ${input.userId})
       `;
 
       return games.map((game) => GameSchema.parse(game));

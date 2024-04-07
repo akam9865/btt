@@ -60,7 +60,7 @@ const Profile = styled(Button)({
   gap: 12,
 });
 
-const Avatar = ({ imageUrl }: { imageUrl?: string | null }) => {
+export const Avatar = ({ imageUrl }: { imageUrl?: string | null }) => {
   return imageUrl ? (
     <ProfilePicture src={imageUrl} alt="profile" width={32} height={32} />
   ) : null;

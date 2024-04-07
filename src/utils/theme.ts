@@ -16,7 +16,11 @@ export const theme = createTheme({
     },
     text: {
       primary: "#000",
-      secondary: "#1b78d0",
+      secondary: "rgba(0, 0, 0, 0.54)",
+      disabled: "rgba(0, 0, 0, 0.38)",
+    },
+    action: {
+      hover: "rgba(0, 0, 0, 0.04)",
     },
   },
   shape: {

@@ -5,6 +5,7 @@ import { User } from "@/utils/schema/UserSchema";
 
 class LobbyStore {
   games: GameOverview[] = [];
+  joinableGames: GameOverview[] = [];
   isLoading: boolean = false;
   usersStore: UsersStore;
 
@@ -17,7 +18,11 @@ class LobbyStore {
     // my games
     // joinable games
     this.isLoading = true;
-    const games = await trpcClient.getGames.query({});
+
+    const [games, joinableGames] = await Promise.all([
+      trpcClient.getGames.query({ userId }),
+      trpcClient.getJoinableGames.query({ userId }),
+    ]);
 
     runInAction(() => {
       games.forEach(({ id, playerXId, playerOId }) => {
@@ -28,6 +33,25 @@ class LobbyStore {
           this.games.push(game);
         }
       });
+
+      joinableGames.forEach(({ id, playerXId, playerOId }) => {
+        const hasGame = this.joinableGames.find((game) => game.gameId === id);
+
+        if (!hasGame) {
+          const game = new GameOverview(this, { id, playerXId, playerOId });
+          this.joinableGames.push(game);
+        }
+      });
+    });
+  }
+
+  async joinGame(gameId: string, userId: string) {
+    await trpcClient.joinGame.mutate({ gameId, playerId: userId });
+
+    runInAction(() => {
+      this.joinableGames = this.joinableGames.filter(
+        (game) => game.gameId !== gameId
+      );
     });
   }
 }
@@ -60,6 +84,18 @@ export class GameOverview {
   get playerO(): User | undefined {
     if (!this.playerOId) return;
     return this.store.usersStore.get(this.playerOId);
+  }
+
+  getOpponent(userId?: string): User | undefined {
+    if (!userId) return;
+
+    if (this.playerXId === userId) {
+      return this.playerO;
+    } else if (this.playerOId === userId) {
+      return this.playerX;
+    }
+
+    return this.playerX || this.playerO;
   }
 
   hydrateUsers() {
