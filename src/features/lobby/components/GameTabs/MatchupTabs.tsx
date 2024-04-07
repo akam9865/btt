@@ -48,9 +48,10 @@ export const MatchupsTabs = observer(() => {
 });
 
 const Content = styled("div")({
-  flexGrow: 1,
   display: "flex",
   flexDirection: "column",
+  minHeight: 0,
+  height: "100%",
 });
 
 const TabsContainer = styled("div")(({ theme }) => ({
@@ -59,4 +60,5 @@ const TabsContainer = styled("div")(({ theme }) => ({
   flexGrow: 1,
   display: "flex",
   flexDirection: "column",
+  minHeight: 0,
 }));

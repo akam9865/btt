@@ -53,6 +53,7 @@ const Container = styled("div")(({ theme }) => ({
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
   flexGrow: 1,
   overflow: "auto",
+  minHeight: 0,
 }));
 
 const Row = styled("div")(({ theme }) => ({

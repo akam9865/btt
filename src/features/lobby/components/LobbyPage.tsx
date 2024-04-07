@@ -55,8 +55,8 @@ export const LobbyPage = observer(() => {
 
 const Container = styled("div")(({ theme }) => ({
   display: "flex",
-  alignItems: "stretch",
   gap: 16,
+  height: 600,
 }));
 
 const SidePanel = styled("div")({
