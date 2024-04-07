@@ -57,4 +57,6 @@ const TabsContainer = styled("div")(({ theme }) => ({
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
   borderRadius: theme.shape.borderRadius,
   flexGrow: 1,
+  display: "flex",
+  flexDirection: "column",
 }));

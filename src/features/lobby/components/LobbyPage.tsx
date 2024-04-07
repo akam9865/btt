@@ -55,6 +55,7 @@ export const LobbyPage = observer(() => {
 
 const Container = styled("div")(({ theme }) => ({
   display: "flex",
+  alignItems: "stretch",
   gap: 16,
 }));
 
@@ -62,12 +63,10 @@ const SidePanel = styled("div")({
   display: "flex",
   flexDirection: "column",
   gap: 16,
-  height: "100%",
 });
 
 const Rules = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   paddingRight: 12,
   width: 350,
-  // flexGrow: 1,
 }));

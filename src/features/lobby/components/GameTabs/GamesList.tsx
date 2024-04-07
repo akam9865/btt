@@ -51,7 +51,7 @@ const Container = styled("div")(({ theme }) => ({
   minWidth: 320,
   background: theme.palette.background.paper,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
-  height: "100%",
+  flexGrow: 1,
   overflow: "auto",
 }));
 
