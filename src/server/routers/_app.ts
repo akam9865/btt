@@ -36,6 +36,7 @@ export const appRouter = router({
         input.symbol === "X"
           ? sql`UPDATE games SET player_x = ${input.playerId} WHERE id = ${input.gameId} RETURNING *`
           : sql`UPDATE games SET player_o = ${input.playerId} WHERE id = ${input.gameId} RETURNING *`;
+
       const [game] = await query;
       return { gameId: game.id };
     }),
