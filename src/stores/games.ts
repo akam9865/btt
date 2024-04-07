@@ -5,6 +5,7 @@ import { User } from "@/utils/schema/UserSchema";
 
 class LobbyStore {
   games: GameOverview[] = [];
+  joinableGames: GameOverview[] = [];
   isLoading: boolean = false;
   usersStore: UsersStore;
 
@@ -17,7 +18,12 @@ class LobbyStore {
     // my games
     // joinable games
     this.isLoading = true;
-    const games = await trpcClient.getGames.query({});
+    console.log(userId);
+
+    const [games, joinableGames] = await Promise.all([
+      trpcClient.getGames.query({ userId }),
+      trpcClient.getJoinableGames.query(),
+    ]);
 
     runInAction(() => {
       games.forEach(({ id, playerXId, playerOId }) => {
@@ -26,6 +32,15 @@ class LobbyStore {
         if (!hasGame) {
           const game = new GameOverview(this, { id, playerXId, playerOId });
           this.games.push(game);
+        }
+      });
+
+      joinableGames.forEach(({ id, playerXId, playerOId }) => {
+        const hasGame = this.joinableGames.find((game) => game.gameId === id);
+
+        if (!hasGame) {
+          const game = new GameOverview(this, { id, playerXId, playerOId });
+          this.joinableGames.push(game);
         }
       });
     });

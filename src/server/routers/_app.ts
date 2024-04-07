@@ -5,16 +5,10 @@ import { MovesSchema } from "@/utils/schema/MovesSchema";
 import { GameSchema } from "@/utils/schema/GameSchema";
 import { UserSchema } from "@/utils/schema/UserSchema";
 
-// abstraction
-//  findGame(playerId) => gameId - look for a joinable game or create a new one
-//  getGame -
-
 export const appRouter = router({
   getUser: procedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
-      console.log(input.userId);
-
       const [user] = await sql`
         SELECT * FROM next_auth.users WHERE id = ${input.userId}
       `;
@@ -32,6 +26,18 @@ export const appRouter = router({
       const [newGame] = await query;
 
       return { gameId: newGame.id };
+    }),
+  joinGame: procedure
+    .input(
+      z.object({ playerId: z.string(), symbol: z.string(), gameId: z.string() })
+    )
+    .mutation(async ({ input }) => {
+      const query =
+        input.symbol === "X"
+          ? sql`UPDATE games SET player_x = ${input.playerId} WHERE id = ${input.gameId} RETURNING *`
+          : sql`UPDATE games SET player_o = ${input.playerId} WHERE id = ${input.gameId} RETURNING *`;
+      const [game] = await query;
+      return { gameId: game.id };
     }),
 
   findGame: procedure
@@ -59,14 +65,24 @@ export const appRouter = router({
     }),
 
   getGames: procedure
-    .input(z.object({ playerId: z.optional(z.string()) }))
+    .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
       const games = await sql`
-        SELECT * FROM games
+        SELECT * FROM games WHERE player_o = ${input.userId} OR player_x = ${input.userId}
       `;
 
       return games.map((game) => GameSchema.parse(game));
     }),
+
+  getJoinableGames: procedure.query(async () => {
+    const games = await sql`
+        SELECT * FROM games
+        WHERE (player_o IS NULL AND player_x IS NOT NULL)
+        OR (player_x IS NULL AND player_o IS NOT NULL)
+      `;
+
+    return games.map((game) => GameSchema.parse(game));
+  }),
 
   getGame: procedure
     .input(z.object({ gameId: z.string() }))
