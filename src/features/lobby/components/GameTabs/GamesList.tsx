@@ -1,20 +1,36 @@
-import { GameOverview } from "@/stores/games";
+import { Avatar } from "@/features/core/ui/Profile";
+import { useUserId } from "@/hooks/useUserId";
+import { GameOverview, lobbyStore } from "@/stores/games";
 import { trpc } from "@/utils/trpc";
-import { Button, styled } from "@mui/material";
+import { styled } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 export const GamesList = observer(({ games }: { games: GameOverview[] }) => {
-  const { data } = useSession();
-  const user = data?.user as { id: string } | undefined;
+  return (
+    <Container>
+      {games.map((game) => (
+        <GameRow game={game} key={game.gameId} />
+      ))}
+    </Container>
+  );
+});
+
+const GameRow = observer(({ game }: { game: GameOverview }) => {
+  const userId = useUserId();
+  const canJoin = !game.playerX || !game.playerO;
   const mutation = trpc.joinGame.useMutation();
   const router = useRouter();
+  const opponent = game.getOpponent(userId);
 
-  const handleJoinGame = (gameId: string, symbol: string = "X") => {
-    if (!user?.id) return;
-    mutation.mutate({ playerId: user.id, gameId, symbol });
+  const handleClick = async () => {
+    if (canJoin && userId) {
+      await lobbyStore.joinGame(game.gameId, userId);
+      router.push(`/game/${game.gameId}`);
+    } else {
+      router.push(`/game/${game.gameId}`);
+    }
   };
 
   useEffect(() => {
@@ -24,34 +40,10 @@ export const GamesList = observer(({ games }: { games: GameOverview[] }) => {
   }, [router, mutation.data?.gameId]);
 
   return (
-    <Container>
-      {games.map((game) => (
-        <Row key={game.gameId}>
-          {game.playerX ? (
-            <div>{game.playerX.name}</div>
-          ) : (
-            <Button
-              variant={"outlined"}
-              size={"small"}
-              onClick={() => handleJoinGame(game.gameId, "X")}
-            >
-              Join
-            </Button>
-          )}
-          {game.playerO ? (
-            <div>{game.playerO.name}</div>
-          ) : (
-            <Button
-              variant={"outlined"}
-              size={"small"}
-              onClick={() => handleJoinGame(game.gameId, "O")}
-            >
-              Join
-            </Button>
-          )}
-        </Row>
-      ))}
-    </Container>
+    <Row onClick={handleClick}>
+      <Avatar imageUrl={opponent?.image} />
+      {opponent?.name}
+    </Row>
   );
 });
 
@@ -59,18 +51,17 @@ const Container = styled("div")(({ theme }) => ({
   minWidth: 320,
   background: theme.palette.background.paper,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
-}));
-
-const Header = styled("div")(({ theme }) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  padding: 8,
+  height: "100%",
+  overflow: "auto",
 }));
 
 const Row = styled("div")(({ theme }) => ({
   display: "flex",
-  justifyContent: "space-between",
+  gap: 8,
   padding: 8,
   alignItems: "center",
+  cursor: "pointer",
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
 }));

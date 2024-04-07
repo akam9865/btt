@@ -34,16 +34,24 @@ export const MatchupsTabs = observer(() => {
           onClick={() => setTab(Panels.CREATE)}
         />
       </Tabs>
-      {tab === Panels.LOBBY ? (
-        <GamesList games={joinableGames} />
-      ) : tab === Panels.MY ? (
-        <GamesList games={games} />
-      ) : tab === Panels.CREATE ? (
-        <CreateGamePanel />
-      ) : null}
+      <Content>
+        {tab === Panels.LOBBY ? (
+          <GamesList games={joinableGames} />
+        ) : tab === Panels.MY ? (
+          <GamesList games={games} />
+        ) : tab === Panels.CREATE ? (
+          <CreateGamePanel />
+        ) : null}
+      </Content>
     </TabsContainer>
   );
 });
 
-const Content = styled("div")(({ theme }) => ({}));
-const TabsContainer = styled("div")(({ theme }) => ({}));
+const Content = styled("div")({
+  height: 350,
+});
+
+const TabsContainer = styled("div")(({ theme }) => ({
+  boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
+  borderRadius: theme.shape.borderRadius,
+}));

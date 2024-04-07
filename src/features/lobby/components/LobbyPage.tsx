@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { styled } from "@mui/material";
 import { lobbyStore } from "@/stores/games";
-import { GamesList } from "./GameTabs/GamesList";
 import { MatchupsTabs } from "./GameTabs/MatchupTabs";
 
 export const LobbyPage = observer(() => {
@@ -14,13 +13,6 @@ export const LobbyPage = observer(() => {
   const router = useRouter();
   const { data } = useSession();
   const user = data?.user as { id: string } | undefined;
-
-  const { games, joinableGames } = lobbyStore;
-
-  const handleCreateGame = (symbol: string = "X") => {
-    if (!user?.id) return;
-    mutation.mutate({ playerId: user.id, symbol });
-  };
 
   useEffect(() => {
     if (mutation.data?.gameId) {
@@ -36,8 +28,6 @@ export const LobbyPage = observer(() => {
 
   return (
     <Container>
-      {/* <GamesList games={joinableGames} title={"Lobby"} />
-      <GamesList games={games} title={"My Games"} /> */}
       <MatchupsTabs />
     </Container>
   );

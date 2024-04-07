@@ -4,17 +4,18 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Button, styled } from "@mui/material";
+import { useUserId } from "@/hooks/useUserId";
 
 export const CreateGamePanel = observer(() => {
   const mutation = trpc.createGame.useMutation();
 
   const router = useRouter();
   const { data } = useSession();
-  const user = data?.user as { id: string } | undefined;
+  const userId = useUserId();
 
   const handleCreateGame = (symbol: string = "X") => {
-    if (!user?.id) return;
-    mutation.mutate({ playerId: user.id, symbol });
+    if (!userId) return;
+    mutation.mutate({ playerId: userId, symbol });
   };
 
   useEffect(() => {
@@ -50,13 +51,15 @@ const CreateContainer = styled("div")(({ theme }) => ({
   flexDirection: "column",
   gap: 8,
   backgroundColor: theme.palette.background.paper,
-  height: "fit-content",
+  height: "100%",
+  justifyContent: "center",
+  padding: 12,
 }));
 
 const ButtonsContainer = styled("div")(({ theme }) => ({
   display: "flex",
-  justifyContent: "space-between",
-  padding: 12,
+  justifyContent: "center",
+  gap: 12,
 }));
 
 const Header = styled("div")(({ theme }) => ({

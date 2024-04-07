@@ -28,16 +28,19 @@ export const appRouter = router({
       return { gameId: newGame.id };
     }),
   joinGame: procedure
-    .input(
-      z.object({ playerId: z.string(), symbol: z.string(), gameId: z.string() })
-    )
+    .input(z.object({ playerId: z.string(), gameId: z.string() }))
     .mutation(async ({ input }) => {
-      const query =
-        input.symbol === "X"
-          ? sql`UPDATE games SET player_x = ${input.playerId} WHERE id = ${input.gameId} RETURNING *`
-          : sql`UPDATE games SET player_o = ${input.playerId} WHERE id = ${input.gameId} RETURNING *`;
+      const query = sql`
+        UPDATE games
+        SET
+          player_o = CASE WHEN player_o IS NULL THEN ${input.playerId} ELSE player_o END,
+          player_x = CASE WHEN player_x IS NULL THEN ${input.playerId} ELSE player_x END
+        WHERE id = ${input.gameId}
+        RETURNING *
+      `;
 
       const [game] = await query;
+
       return { gameId: game.id };
     }),
 
@@ -69,21 +72,25 @@ export const appRouter = router({
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
       const games = await sql`
-        SELECT * FROM games WHERE player_o = ${input.userId} OR player_x = ${input.userId}
+        SELECT * FROM games
+        WHERE (player_o = ${input.userId} AND player_x IS NOT NULL)
+        OR (player_x = ${input.userId} AND player_o IS NOT NULL)
       `;
 
       return games.map((game) => GameSchema.parse(game));
     }),
 
-  getJoinableGames: procedure.query(async () => {
-    const games = await sql`
+  getJoinableGames: procedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      const games = await sql`
         SELECT * FROM games
-        WHERE (player_o IS NULL AND player_x IS NOT NULL)
-        OR (player_x IS NULL AND player_o IS NOT NULL)
+        WHERE (player_o IS NULL AND player_x IS NOT NULL AND player_x != ${input.userId})
+        OR (player_x IS NULL AND player_o IS NOT NULL AND player_o != ${input.userId})
       `;
 
-    return games.map((game) => GameSchema.parse(game));
-  }),
+      return games.map((game) => GameSchema.parse(game));
+    }),
 
   getGame: procedure
     .input(z.object({ gameId: z.string() }))
