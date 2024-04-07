@@ -11,6 +11,7 @@ import {
   observable,
   runInAction,
 } from "mobx";
+import { usersStore } from "./users";
 
 // A board will be a 1d array with 9 elements.
 // Indices translate to a 3x3 grid as follows:
@@ -34,18 +35,11 @@ type BigBoard = [
   TicTacToe
 ];
 
-type User = {
-  id?: string;
-  name?: string;
-  image?: string;
-};
-
-class GameStore {
+export class GameStore {
   gameId: string = "";
   createdAt?: Date;
-  // TODO: extract users to a separate store
-  playerX?: User;
-  playerO?: User;
+  playerXId: string | null = null;
+  playerOId: string | null = null;
   moves: Move[] = [];
   smartBoard: BigBoard;
 
@@ -57,13 +51,22 @@ class GameStore {
     makeAutoObservable(this, { applyMove: action });
   }
 
-  get turn(): "X" | "O" {
+  get turnSymbol(): "X" | "O" {
     return this.moves.length % 2 === 0 ? "X" : "O";
   }
 
-  get playerTurn(): string | undefined {
-    if (!this.playerX || !this.playerO) return undefined;
-    return this.turn === "X" ? this.playerX.id : this.playerO.id;
+  get turnPlayerId(): string | null {
+    return this.turnSymbol === "X" ? this.playerXId : this.playerOId;
+  }
+
+  get playerX() {
+    if (!this.playerXId) return;
+    return usersStore.get(this.playerXId);
+  }
+
+  get playerO() {
+    if (!this.playerOId) return;
+    return usersStore.get(this.playerOId);
   }
 
   get lastMove(): Move | undefined {
@@ -108,6 +111,16 @@ class GameStore {
     return formattedMoves;
   }
 
+  reset() {
+    this.gameId = "";
+    this.playerXId = null;
+    this.playerOId = null;
+    this.moves = [];
+    this.smartBoard = BOARD_INDICES.map(
+      (bigBoardIndex) => new TicTacToe(bigBoardIndex)
+    ) as BigBoard;
+  }
+
   canClick(position: Position, playerId?: string) {
     if (!playerId) return false;
     if (this.winner) return false;
@@ -116,7 +129,7 @@ class GameStore {
 
     if (board.board[position.littleBoardIndex].symbol) return false;
     if (board.isOver) return false;
-    if (playerId !== this.playerTurn) return false;
+    if (playerId !== this.turnPlayerId) return false;
 
     return this.availableBoards.includes(position.bigBoardIndex);
   }
@@ -143,12 +156,12 @@ class GameStore {
     playerId: string,
     position: Position
   ) {
-    const { gameId, playerTurn } = this;
-    const moveSymbol = this.turn;
+    const { gameId, turnPlayerId } = this;
+    const moveSymbol = this.turnSymbol;
     const { bigBoardIndex, littleBoardIndex } = position;
     const existingSymbol = this.symbolAtPosition(position);
 
-    assert(playerTurn === playerId, "not your turn");
+    assert(turnPlayerId === playerId, "not your turn");
     assert(existingSymbol === null, "occupied cell");
     assert(gameId, "gameId required");
     assert(playerId, "playerId required");
@@ -158,7 +171,7 @@ class GameStore {
 
       yield trpcClient.saveMove.mutate({
         gameId,
-        playerId: playerTurn,
+        playerId,
         symbol: moveSymbol,
         bigBoardIndex,
         littleBoardIndex,
@@ -175,8 +188,10 @@ class GameStore {
     this.moves.push(move);
   }
 
-  // trpc client isn't behaving well with yield, using async/await + runInAction where type safety is important
   async loadGame(gameId: string) {
+    // naive reset; todo: something smarter
+    this.reset();
+
     try {
       this.gameId = gameId;
 
@@ -185,9 +200,15 @@ class GameStore {
         trpcClient.getMoves.query({ gameId }),
       ]);
 
+      Promise.all(
+        [game.playerXId, game.playerOId].map((userId) =>
+          userId ? usersStore.resolveUser(userId) : null
+        )
+      );
+
       runInAction(() => {
-        this.playerO = game.playerO || undefined;
-        this.playerX = game.playerX || undefined;
+        this.playerXId = game.playerXId;
+        this.playerOId = game.playerOId;
         this.createdAt = new Date(game.createdAt);
         this.moves = moves;
 
@@ -201,15 +222,12 @@ class GameStore {
     }
   }
 
-  // createGame = flow(function* createGame() {});
-  // requestGame = flow(function* requestGame() {});
-
   subscribe(gameId: string) {
     if (this.unsubscribe) return;
 
     console.log("subscribing to moves for game: ", gameId);
-    const movesChannel = supabase.channel("schema-db-changes");
-    movesChannel
+    const schemaDbChangesChannel = supabase.channel("schema-db-changes");
+    schemaDbChangesChannel
       .on(
         "postgres_changes",
         {
@@ -237,7 +255,7 @@ class GameStore {
       .subscribe();
 
     this.unsubscribe = () => {
-      supabase.removeChannel(movesChannel);
+      supabase.removeChannel(schemaDbChangesChannel);
     };
     return this.unsubscribe;
   }
