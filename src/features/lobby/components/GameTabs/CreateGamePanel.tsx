@@ -2,15 +2,13 @@ import { observer } from "mobx-react-lite";
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useSession } from "next-auth/react";
+
 import { Button, styled } from "@mui/material";
 import { useUserId } from "@/hooks/useUserId";
 
 export const CreateGamePanel = observer(() => {
   const mutation = trpc.createGame.useMutation();
-
   const router = useRouter();
-  const { data } = useSession();
   const userId = useUserId();
 
   const handleCreateGame = (symbol: string = "X") => {

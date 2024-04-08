@@ -1,18 +1,19 @@
-import { gameStore } from "@/stores/game";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { GameBoard } from "./GameBoard";
 import { Box, styled } from "@mui/material";
 import { formatTimeSince } from "../utils/formatters";
 import { Link } from "@/features/core/ui/Link";
+import { gamesStore } from "@/stores/games";
 
 type GameProps = { gameId: string };
 
 export const GamePage = observer(({ gameId }: GameProps) => {
-  const { createdAt, playerX, playerO, winner } = gameStore;
+  const game = gamesStore.getGame(gameId);
+  const { createdAt, playerX, playerO, winner, formattedMoves } = game || {};
+
   useEffect(() => {
-    gameStore.loadGame(gameId);
-    gameStore.subscribe(gameId);
+    gamesStore.loadGame(gameId);
   }, [gameId]);
 
   return (
@@ -34,10 +35,10 @@ export const GamePage = observer(({ gameId }: GameProps) => {
         {winner && <Result>{winner.symbol} Wins</Result>}
       </GameDetails>
 
-      <GameBoard />
+      <GameBoard game={game} />
 
       <MovesList>
-        {gameStore.formattedMoves.map(({ moves, turnNumber }) => {
+        {formattedMoves?.map(({ moves, turnNumber }) => {
           return (
             <MoveRow key={turnNumber}>
               <MoveNumber>{turnNumber}</MoveNumber>

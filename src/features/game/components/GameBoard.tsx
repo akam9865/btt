@@ -1,28 +1,36 @@
-import { Cell, gameStore, TicTacToe } from "@/stores/game";
 import { observer } from "mobx-react-lite";
-
 import { styled } from "@mui/material";
 import { joinPosition } from "../utils/utils";
 import { useUserId } from "@/hooks/useUserId";
+import { AbstractGame, TicTacToe, Cell } from "../entities/AbstractGame";
 
-export const GameBoard = observer(() => {
-  const { smartBoard, availableBoards } = gameStore;
-
+export const GameBoard = observer(({ game }: { game?: AbstractGame }) => {
   return (
     <FullBoard>
-      {smartBoard.map((littleBoard, bigBoardIndex) => (
-        <LittleBoard
-          key={bigBoardIndex}
-          cells={littleBoard}
-          isValid={availableBoards.includes(bigBoardIndex)}
-        />
-      ))}
+      {game &&
+        game.smartBoard.map((littleBoard, bigBoardIndex) => (
+          <LittleBoard
+            key={bigBoardIndex}
+            cells={littleBoard}
+            game={game}
+            isValid={game.availableBoards.includes(bigBoardIndex)}
+          />
+        ))}
     </FullBoard>
   );
 });
 
+// TODO: game is a passthrough variable, look for cleaner design.
 const LittleBoard = observer(
-  ({ cells, isValid }: { cells: TicTacToe; isValid: boolean }) => {
+  ({
+    cells,
+    isValid,
+    game,
+  }: {
+    cells: TicTacToe;
+    isValid: boolean;
+    game: AbstractGame;
+  }) => {
     if (cells.winner) {
       return <CompleteGame>{cells.winner.symbol}</CompleteGame>;
     }
@@ -39,7 +47,7 @@ const LittleBoard = observer(
           })}
         >
           {cells.board.map((c) => (
-            <GameCell key={joinPosition(c.position)} cell={c} />
+            <GameCell key={joinPosition(c.position)} cell={c} game={game} />
           ))}
         </Grid>
       </BigCell>
@@ -66,40 +74,42 @@ const FullBoard = styled(Grid)(({ theme }) => ({
   },
 }));
 
-const GameCell = observer(({ cell }: { cell: Cell }) => {
-  const { position } = cell;
-  const userId = useUserId();
+const GameCell = observer(
+  ({ cell, game }: { cell: Cell; game: AbstractGame }) => {
+    const { position } = cell;
+    const userId = useUserId();
 
-  const canClick = gameStore.canClick(position, userId);
-  const isLastMove = gameStore.isLastMove(position);
+    const canClick = game.canClick(position, userId);
+    const isLastMove = game.isLastMove(position);
 
-  const handleClick = () => {
-    if (!canClick) return;
-    if (!userId) return;
+    const handleClick = () => {
+      if (!canClick) return;
+      if (!userId) return;
 
-    gameStore.move(userId, position);
-  };
+      game.move(userId, position);
+    };
 
-  return (
-    <LittleCell
-      onClick={handleClick}
-      sx={
-        canClick
-          ? {
-              cursor: "pointer",
-              ":hover": {
-                backgroundColor: (t) => t.palette.background.default,
-              },
-            }
-          : isLastMove
-          ? { backgroundColor: "#FFF6C3" }
-          : {}
-      }
-    >
-      {cell.symbol}&nbsp;
-    </LittleCell>
-  );
-});
+    return (
+      <LittleCell
+        onClick={handleClick}
+        sx={
+          canClick
+            ? {
+                cursor: "pointer",
+                ":hover": {
+                  backgroundColor: (t) => t.palette.background.default,
+                },
+              }
+            : isLastMove
+            ? { backgroundColor: "#FFF6C3" }
+            : {}
+        }
+      >
+        {cell.symbol}&nbsp;
+      </LittleCell>
+    );
+  }
+);
 
 const borderRules = {
   ":nth-of-type(3n)": {

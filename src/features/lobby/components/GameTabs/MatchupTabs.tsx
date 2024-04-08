@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Tab, Tabs, styled } from "@mui/material";
-import { lobbyStore } from "@/stores/games";
+import { lobbyStore } from "@/stores/lobby";
 import { GamesList } from "./GamesList";
 import { CreateGamePanel } from "./CreateGamePanel";
 

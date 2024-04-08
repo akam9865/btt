@@ -279,8 +279,6 @@ export class TicTacToe {
       position: { bigBoardIndex, littleBoardIndex },
       symbol: null,
     }));
-
-    makeObservable(this, { board: observable, move: action });
   }
 
   get winner() {
