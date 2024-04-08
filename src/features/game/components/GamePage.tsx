@@ -18,38 +18,39 @@ export const GamePage = observer(({ gameId }: GameProps) => {
 
   return (
     <Container>
-      <GameDetails>
-        <Header>
-          <div>Friendly Game</div>
-          {formatTimeSince(createdAt)}
-        </Header>
-        <UserRow>
-          <div>X</div>
-          <Link href={`/user/${playerX?.id}`}>{playerX?.name}</Link>
-        </UserRow>
-        <UserRow>
-          <div>O</div>
-          <Link href={`/user/${playerO?.id}`}>{playerO?.name}</Link>
-        </UserRow>
-
-        {winner && <Result>{winner.symbol} Wins</Result>}
-      </GameDetails>
-
       <GameBoard game={game} />
+      <SidePanel>
+        <GameDetails>
+          <Header>
+            <div>Friendly Game</div>
+            {formatTimeSince(createdAt)}
+          </Header>
+          <UserRow>
+            <div>X</div>
+            <Link href={`/user/${playerX?.id}`}>{playerX?.name}</Link>
+          </UserRow>
+          <UserRow>
+            <div>O</div>
+            <Link href={`/user/${playerO?.id}`}>{playerO?.name}</Link>
+          </UserRow>
 
-      <MovesList>
-        {formattedMoves?.map(({ moves, turnNumber }) => {
-          return (
-            <MoveRow key={turnNumber}>
-              <MoveNumber>{turnNumber}</MoveNumber>
-              <MovePair>
-                <Box flex={1}>X ({moves.x})</Box>
-                {moves.o && <Box flex={1}>O ({moves.o})</Box>}
-              </MovePair>
-            </MoveRow>
-          );
-        })}
-      </MovesList>
+          {winner && <Result>{winner.symbol} Wins</Result>}
+        </GameDetails>
+
+        <MovesList>
+          {formattedMoves?.map(({ moves, turnNumber }) => {
+            return (
+              <MoveRow key={turnNumber}>
+                <MoveNumber>{turnNumber}</MoveNumber>
+                <MovePair>
+                  <Box flex={1}>X ({moves.x})</Box>
+                  {moves.o && <Box flex={1}>O ({moves.o})</Box>}
+                </MovePair>
+              </MoveRow>
+            );
+          })}
+        </MovesList>
+      </SidePanel>
     </Container>
   );
 });
@@ -75,21 +76,16 @@ const UserRow = styled("div")(({ theme }) => ({
 }));
 
 const Container = styled("div")(({ theme }) => ({
-  gap: 24,
   display: "flex",
-  flexDirection: "column",
-  [theme.breakpoints.up("md")]: {
-    flexDirection: "row",
-  },
+  gap: 16,
+  height: 600,
 }));
 
 const GameDetails = styled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   display: "flex",
   backgroundColor: theme.palette.background.paper,
-  width: 240,
   flexDirection: "column",
-  height: "fit-content",
   padding: 12,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
 }));
@@ -97,9 +93,9 @@ const GameDetails = styled("div")(({ theme }) => ({
 const MovesList = styled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   backgroundColor: theme.palette.background.paper,
-  height: "fit-content",
-  width: 240,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
+  minHeight: 0,
+  overflow: "auto",
 }));
 
 const MoveRow = styled("div")({
@@ -120,3 +116,10 @@ const MoveNumber = styled("div")(({ theme }) => ({
   padding: "4px 16px",
   width: "40px",
 }));
+
+const SidePanel = styled("div")({
+  display: "flex",
+  flexDirection: "column",
+  gap: 16,
+  width: 350,
+});

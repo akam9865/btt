@@ -63,11 +63,11 @@ const SidePanel = styled("div")({
   display: "flex",
   flexDirection: "column",
   gap: 16,
+  width: 350,
 });
 
 const Rules = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   paddingRight: 12,
-  width: 350,
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
 }));
