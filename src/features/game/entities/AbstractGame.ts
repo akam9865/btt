@@ -181,22 +181,6 @@ export class TicTacToe {
   }
 }
 
-// TABLES
-// -------
-// Games
-//   startTime
-//   endTime
-//   result
-// Users
-// Participants ?
-//   player_id
-//   game_id
-//   score
-// Moves
-//   game_id
-//   player/participant_id
-//   move_number
-
 export function getWinnerForBoard(
   board: Symbol[]
 ): { symbol: Symbol; positions: number[] } | null {
