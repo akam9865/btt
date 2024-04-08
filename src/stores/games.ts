@@ -1,8 +1,9 @@
-import { AbstractGame, RealGame } from "@/features/game/entities/game";
+import { PvPGame } from "@/features/game/entities/PvPGame";
+import { AbstractGame } from "@/features/game/entities/AbstractGame";
 import { makeAutoObservable } from "mobx";
 
 class GamesStore {
-  games: RealGame[] = [];
+  games: PvPGame[] = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -13,7 +14,7 @@ class GamesStore {
   }
 
   loadGame(gameId: string) {
-    const game = new RealGame(gameId);
+    const game = new PvPGame(gameId);
     this.games.push(game);
     game.loadGame();
     game.subscribe();

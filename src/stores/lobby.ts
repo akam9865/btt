@@ -2,7 +2,6 @@ import { trpcClient } from "@/utils/trpc";
 import { makeAutoObservable, runInAction } from "mobx";
 import { UsersStore, usersStore } from "./users";
 import { User } from "@/utils/schema/UserSchema";
-import { RealGame } from "@/features/game/entities/game";
 
 class LobbyStore {
   games: GameOverview[] = [];
@@ -14,10 +13,6 @@ class LobbyStore {
     this.usersStore = usersStore;
     makeAutoObservable(this);
   }
-
-  // getGame(gameId: string) {
-  //   return [...this.games, ...this.joinableGames].find((game) => game.gameId === gameId);
-  // }
 
   async loadGames(userId: string) {
     // my games
@@ -109,11 +104,6 @@ export class GameOverview {
       )
     );
   }
-
-  // play() {
-  //   this.game = new RealGame(this.gameId);
-  //   this.game.loadGame();
-  // }
 
   subscribe() {
     // subscribe to games table

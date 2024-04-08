@@ -7,6 +7,7 @@ import { lobbyStore } from "@/stores/lobby";
 import { MatchupsTabs } from "./GameTabs/MatchupTabs";
 import { GameBoard } from "@/features/game/components/GameBoard";
 import { useUserId } from "@/hooks/useUserId";
+import { blankGame } from "@/features/game/entities/BlankGame";
 
 export const LobbyPage = observer(() => {
   const mutation = trpc.createGame.useMutation();
@@ -28,7 +29,7 @@ export const LobbyPage = observer(() => {
 
   return (
     <Container>
-      <GameBoard />
+      <GameBoard game={blankGame} />
       <SidePanel>
         <MatchupsTabs />
         <Rules>

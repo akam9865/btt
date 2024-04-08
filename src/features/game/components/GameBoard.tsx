@@ -2,7 +2,8 @@ import { observer } from "mobx-react-lite";
 import { styled } from "@mui/material";
 import { joinPosition } from "../utils/utils";
 import { useUserId } from "@/hooks/useUserId";
-import { AbstractGame, TicTacToe, Cell } from "../entities/game";
+import { TicTacToe, Cell } from "../entities/PvPGame";
+import { AbstractGame } from "../entities/AbstractGame";
 
 export const GameBoard = observer(({ game }: { game?: AbstractGame }) => {
   return (
