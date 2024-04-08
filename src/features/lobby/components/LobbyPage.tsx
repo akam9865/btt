@@ -34,7 +34,7 @@ export const LobbyPage = observer(() => {
         <MatchupsTabs />
         <Rules>
           <ul>
-            <li>Win the small board to claim it for your side</li>
+            <li>Win a small board to claim it for your side</li>
             <li>
               The next move may only be played in the board that corresponds
               with the cell where the last move was played. i.e. last move was
@@ -45,7 +45,7 @@ export const LobbyPage = observer(() => {
               If the corresponding board is already complete, then any board may
               be played.
             </li>
-            <li>Win three in a row on a large board to win the game.</li>
+            <li>Win three in a row on the large board to win the game.</li>
           </ul>
         </Rules>
       </SidePanel>
