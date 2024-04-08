@@ -2,18 +2,17 @@ import { observer } from "mobx-react-lite";
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { styled } from "@mui/material";
 import { lobbyStore } from "@/stores/lobby";
 import { MatchupsTabs } from "./GameTabs/MatchupTabs";
 import { GameBoard } from "@/features/game/components/GameBoard";
+import { useUserId } from "@/hooks/useUserId";
 
 export const LobbyPage = observer(() => {
   const mutation = trpc.createGame.useMutation();
 
   const router = useRouter();
-  const { data } = useSession();
-  const user = data?.user as { id: string } | undefined;
+  const userId = useUserId();
 
   useEffect(() => {
     if (mutation.data?.gameId) {
@@ -22,10 +21,10 @@ export const LobbyPage = observer(() => {
   }, [router, mutation.data?.gameId]);
 
   useEffect(() => {
-    if (user) {
-      lobbyStore.loadGames(user.id);
+    if (userId) {
+      lobbyStore.loadGames(userId);
     }
-  }, [user]);
+  }, [userId]);
 
   return (
     <Container>

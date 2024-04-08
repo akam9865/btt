@@ -6,6 +6,7 @@ import { trpcClient } from "@/utils/trpc";
 import assert from "assert";
 import {
   action,
+  computed,
   flow,
   makeAutoObservable,
   makeObservable,
@@ -47,7 +48,21 @@ export abstract class AbstractGame {
     this.smartBoard = BOARD_INDICES.map(
       (bigBoardIndex) => new TicTacToe(bigBoardIndex)
     ) as BigBoard;
-    // makeObservable(this, {moves: observable, applyMove: action});
+
+    makeObservable(this, {
+      playerXId: observable,
+      playerOId: observable,
+      moves: observable,
+      smartBoard: observable,
+      playerX: computed,
+      playerO: computed,
+      lastMove: computed,
+      availableBoards: computed,
+      formattedMoves: computed,
+      turnSymbol: computed,
+      turnPlayerId: computed,
+      applyMove: action,
+    });
   }
 
   get turnSymbol(): "X" | "O" {
@@ -129,16 +144,6 @@ export abstract class AbstractGame {
     this.moves.push(move);
   }
 
-  reset() {
-    this.gameId = "";
-    this.playerXId = null;
-    this.playerOId = null;
-    this.moves = [];
-    this.smartBoard = BOARD_INDICES.map(
-      (bigBoardIndex) => new TicTacToe(bigBoardIndex)
-    ) as BigBoard;
-  }
-
   symbolAtPosition(position: Position) {
     return this.smartBoard[position.bigBoardIndex].board[
       position.littleBoardIndex
@@ -152,6 +157,12 @@ export abstract class AbstractGame {
 }
 
 export class RealGame extends AbstractGame {
+  constructor(public gameId: string) {
+    super(gameId);
+
+    makeObservable(this, { move: action });
+  }
+
   protected unsubscribe?: () => void = undefined;
 
   get playerX() {
@@ -198,8 +209,6 @@ export class RealGame extends AbstractGame {
         trpcClient.getGame.query({ gameId }),
         trpcClient.getMoves.query({ gameId }),
       ]);
-
-      console.log(game, moves);
 
       Promise.all(
         [game.playerXId, game.playerOId].map((userId) =>
@@ -293,12 +302,12 @@ export class TicTacToe {
     return false;
   }
 
+  canMove() {}
+
   move(position: PositionIndex, symbol: "X" | "O") {
     this.board[position].symbol = symbol;
   }
 }
-
-// export const gameStore = new GameStore();
 
 // TABLES
 // -------

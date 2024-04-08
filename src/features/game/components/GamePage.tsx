@@ -1,4 +1,3 @@
-import { gameStore } from "@/stores/game";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { GameBoard } from "./GameBoard";
@@ -11,12 +10,9 @@ type GameProps = { gameId: string };
 
 export const GamePage = observer(({ gameId }: GameProps) => {
   const game = gamesStore.getGame(gameId);
-  const { createdAt, playerX, playerO, winner, smartBoard } = game || {};
-  console.log(playerX, " ");
+  const { createdAt, playerX, playerO, winner, formattedMoves } = game || {};
 
   useEffect(() => {
-    // gameStore.loadGame(gameId);
-    // gameStore.subscribe(gameId);
     gamesStore.loadGame(gameId);
   }, [gameId]);
 
@@ -42,7 +38,7 @@ export const GamePage = observer(({ gameId }: GameProps) => {
       <GameBoard game={game} />
 
       <MovesList>
-        {gameStore.formattedMoves.map(({ moves, turnNumber }) => {
+        {formattedMoves?.map(({ moves, turnNumber }) => {
           return (
             <MoveRow key={turnNumber}>
               <MoveNumber>{turnNumber}</MoveNumber>
