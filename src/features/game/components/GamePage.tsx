@@ -5,14 +5,19 @@ import { GameBoard } from "./GameBoard";
 import { Box, styled } from "@mui/material";
 import { formatTimeSince } from "../utils/formatters";
 import { Link } from "@/features/core/ui/Link";
+import { gamesStore } from "@/stores/games";
 
 type GameProps = { gameId: string };
 
 export const GamePage = observer(({ gameId }: GameProps) => {
-  const { createdAt, playerX, playerO, winner } = gameStore;
+  const game = gamesStore.getGame(gameId);
+  const { createdAt, playerX, playerO, winner, smartBoard } = game || {};
+  console.log(playerX, " ");
+
   useEffect(() => {
-    gameStore.loadGame(gameId);
-    gameStore.subscribe(gameId);
+    // gameStore.loadGame(gameId);
+    // gameStore.subscribe(gameId);
+    gamesStore.loadGame(gameId);
   }, [gameId]);
 
   return (
@@ -34,7 +39,7 @@ export const GamePage = observer(({ gameId }: GameProps) => {
         {winner && <Result>{winner.symbol} Wins</Result>}
       </GameDetails>
 
-      <GameBoard />
+      <GameBoard game={game} />
 
       <MovesList>
         {gameStore.formattedMoves.map(({ moves, turnNumber }) => {

@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { styled } from "@mui/material";
-import { lobbyStore } from "@/stores/games";
+import { lobbyStore } from "@/stores/lobby";
 import { MatchupsTabs } from "./GameTabs/MatchupTabs";
 import { GameBoard } from "@/features/game/components/GameBoard";
 
@@ -69,4 +69,5 @@ const Rules = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   paddingRight: 12,
   width: 350,
+  boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
 }));

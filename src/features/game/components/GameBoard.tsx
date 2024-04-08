@@ -4,17 +4,20 @@ import { observer } from "mobx-react-lite";
 import { styled } from "@mui/material";
 import { joinPosition } from "../utils/utils";
 import { useUserId } from "@/hooks/useUserId";
+import { AbstractGame } from "../entities/game";
 
-export const GameBoard = observer(() => {
-  const { smartBoard, availableBoards } = gameStore;
+export const GameBoard = observer(({ game }: { game?: AbstractGame }) => {
+  const { smartBoard, availableBoards } = game || {};
 
   return (
     <FullBoard>
-      {smartBoard.map((littleBoard, bigBoardIndex) => (
+      {smartBoard?.map((littleBoard, bigBoardIndex) => (
         <LittleBoard
           key={bigBoardIndex}
           cells={littleBoard}
-          isValid={availableBoards.includes(bigBoardIndex)}
+          isValid={
+            availableBoards ? availableBoards.includes(bigBoardIndex) : true
+          }
         />
       ))}
     </FullBoard>

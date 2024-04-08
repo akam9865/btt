@@ -1,4 +1,5 @@
 import { joinPosition } from "@/features/game/utils/utils";
+import { usersStore } from "@/stores/users";
 import { MoveSchema, type Move } from "@/utils/schema/MovesSchema";
 import { supabase } from "@/utils/supabase";
 import { trpcClient } from "@/utils/trpc";
@@ -11,7 +12,7 @@ import {
   observable,
   runInAction,
 } from "mobx";
-import { usersStore } from "./users";
+// import { usersStore } from "./users";
 
 // A board will be a 1d array with 9 elements.
 // Indices translate to a 3x3 grid as follows:
@@ -35,20 +36,18 @@ type BigBoard = [
   TicTacToe
 ];
 
-export class GameStore {
-  gameId: string = "";
+export abstract class AbstractGame {
   createdAt?: Date;
-  playerXId: string | null = null;
-  playerOId: string | null = null;
   moves: Move[] = [];
   smartBoard: BigBoard;
+  playerXId: string | null = null;
+  playerOId: string | null = null;
 
-  constructor() {
+  constructor(public gameId: string) {
     this.smartBoard = BOARD_INDICES.map(
       (bigBoardIndex) => new TicTacToe(bigBoardIndex)
     ) as BigBoard;
-
-    makeAutoObservable(this, { applyMove: action });
+    // makeObservable(this, {moves: observable, applyMove: action});
   }
 
   get turnSymbol(): "X" | "O" {
@@ -57,16 +56,6 @@ export class GameStore {
 
   get turnPlayerId(): string | null {
     return this.turnSymbol === "X" ? this.playerXId : this.playerOId;
-  }
-
-  get playerX() {
-    if (!this.playerXId) return;
-    return usersStore.get(this.playerXId);
-  }
-
-  get playerO() {
-    if (!this.playerOId) return;
-    return usersStore.get(this.playerOId);
   }
 
   get lastMove(): Move | undefined {
@@ -111,16 +100,6 @@ export class GameStore {
     return formattedMoves;
   }
 
-  reset() {
-    this.gameId = "";
-    this.playerXId = null;
-    this.playerOId = null;
-    this.moves = [];
-    this.smartBoard = BOARD_INDICES.map(
-      (bigBoardIndex) => new TicTacToe(bigBoardIndex)
-    ) as BigBoard;
-  }
-
   canClick(position: Position, playerId?: string) {
     if (!playerId) return false;
     if (this.winner) return false;
@@ -134,8 +113,6 @@ export class GameStore {
     return this.availableBoards.includes(position.bigBoardIndex);
   }
 
-  protected unsubscribe?: () => void = undefined;
-
   isLastMove(position: Position) {
     const lastMove = this.lastMove;
     if (!lastMove) return false;
@@ -145,17 +122,49 @@ export class GameStore {
     );
   }
 
+  applyMove(move: Move) {
+    const { position, symbol } = move;
+    const { bigBoardIndex, littleBoardIndex } = position;
+    this.smartBoard[bigBoardIndex].move(littleBoardIndex, symbol);
+    this.moves.push(move);
+  }
+
+  reset() {
+    this.gameId = "";
+    this.playerXId = null;
+    this.playerOId = null;
+    this.moves = [];
+    this.smartBoard = BOARD_INDICES.map(
+      (bigBoardIndex) => new TicTacToe(bigBoardIndex)
+    ) as BigBoard;
+  }
+
   symbolAtPosition(position: Position) {
     return this.smartBoard[position.bigBoardIndex].board[
       position.littleBoardIndex
     ].symbol;
   }
 
-  move = flow(function* (
-    this: GameStore,
-    playerId: string,
-    position: Position
-  ) {
+  abstract loadGame(): void;
+  abstract move(playerId: string, position: Position): void;
+  abstract get playerX(): any;
+  abstract get playerO(): any;
+}
+
+export class RealGame extends AbstractGame {
+  protected unsubscribe?: () => void = undefined;
+
+  get playerX() {
+    if (!this.playerXId) return;
+    return usersStore.get(this.playerXId);
+  }
+
+  get playerO() {
+    if (!this.playerOId) return;
+    return usersStore.get(this.playerOId);
+  }
+
+  move = flow(function* (this: RealGame, playerId: string, position: Position) {
     const { gameId, turnPlayerId } = this;
     const moveSymbol = this.turnSymbol;
     const { bigBoardIndex, littleBoardIndex } = position;
@@ -181,24 +190,16 @@ export class GameStore {
     }
   });
 
-  applyMove(move: Move) {
-    const { position, symbol } = move;
-    const { bigBoardIndex, littleBoardIndex } = position;
-    this.smartBoard[bigBoardIndex].move(littleBoardIndex, symbol);
-    this.moves.push(move);
-  }
-
-  async loadGame(gameId: string) {
-    // naive reset; todo: something smarter
-    this.reset();
-
+  async loadGame() {
     try {
-      this.gameId = gameId;
+      const { gameId } = this;
 
       const [game, moves] = await Promise.all([
         trpcClient.getGame.query({ gameId }),
         trpcClient.getMoves.query({ gameId }),
       ]);
+
+      console.log(game, moves);
 
       Promise.all(
         [game.playerXId, game.playerOId].map((userId) =>
@@ -222,9 +223,9 @@ export class GameStore {
     }
   }
 
-  subscribe(gameId: string) {
+  subscribe() {
     if (this.unsubscribe) return;
-
+    const { gameId } = this;
     console.log("subscribing to moves for game: ", gameId);
     const schemaDbChangesChannel = supabase.channel("schema-db-changes");
     schemaDbChangesChannel
@@ -297,7 +298,7 @@ export class TicTacToe {
   }
 }
 
-export const gameStore = new GameStore();
+// export const gameStore = new GameStore();
 
 // TABLES
 // -------

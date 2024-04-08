@@ -1,6 +1,6 @@
 import { Avatar } from "@/features/core/ui/Profile";
 import { useUserId } from "@/hooks/useUserId";
-import { GameOverview, lobbyStore } from "@/stores/games";
+import { GameOverview, lobbyStore } from "@/stores/lobby";
 import { trpc } from "@/utils/trpc";
 import { styled } from "@mui/material";
 import { observer } from "mobx-react-lite";
