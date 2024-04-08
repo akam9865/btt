@@ -14,6 +14,8 @@ class GamesStore {
   }
 
   loadGame(gameId: string) {
+    if (this.getGame(gameId)) return;
+
     const game = new PvPGame(gameId);
     this.games.push(game);
     game.loadGame();

@@ -112,7 +112,7 @@ export const appRouter = router({
     .input(z.object({ gameId: z.string() }))
     .query(async ({ input }) => {
       const moves =
-        await sql`SELECT * FROM moves WHERE game_id = ${input.gameId}`;
+        await sql`SELECT * FROM moves WHERE game_id = ${input.gameId} ORDER BY created_at ASC`;
 
       // const moves = [
       //   {
