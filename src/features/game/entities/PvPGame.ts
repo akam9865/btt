@@ -10,7 +10,7 @@ export class PvPGame extends AbstractGame {
   constructor(public gameId: string) {
     super(gameId);
 
-    makeObservable(this, { move: action });
+    makeObservable(this, { move: action, subscribe: action });
   }
 
   protected unsubscribe?: () => void = undefined;
