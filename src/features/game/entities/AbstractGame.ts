@@ -86,7 +86,13 @@ export abstract class AbstractGame {
     const boardResults = this.smartBoard.map(
       (board) => board.winner?.symbol || null
     );
-    return getWinnerForBoard(boardResults);
+    return getWinnerForBoard(boardResults)?.symbol;
+  }
+
+  get isOver(): Boolean {
+    return (
+      Boolean(this.winner) || this.smartBoard.every((board) => board.isOver)
+    );
   }
 
   get formattedMoves() {

@@ -39,6 +39,11 @@ export class PvPGame extends AbstractGame {
     try {
       this.applyMove({ position, symbol: moveSymbol, playerId });
 
+      if (this.isOver) {
+        const result = this.winner ? `${this.winner} wins` : "draw";
+        yield trpcClient.endGame.mutate({ gameId, result, playerId });
+      }
+
       yield trpcClient.saveMove.mutate({
         gameId,
         playerId,

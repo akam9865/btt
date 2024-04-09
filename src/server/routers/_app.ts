@@ -31,11 +31,13 @@ export const appRouter = router({
     .input(z.object({ playerId: z.string(), gameId: z.string() }))
     .mutation(async ({ input }) => {
       const query = sql`
-        UPDATE games
+        UPDATE
+          games
         SET
           player_o = CASE WHEN player_o IS NULL THEN ${input.playerId} ELSE player_o END,
           player_x = CASE WHEN player_x IS NULL THEN ${input.playerId} ELSE player_x END
-        WHERE id = ${input.gameId}
+        WHERE
+          id = ${input.gameId}
         RETURNING *
       `;
 
@@ -101,6 +103,26 @@ export const appRouter = router({
           *
         FROM
           games
+        WHERE
+          games.id = ${gameId}
+      `;
+
+      return GameSchema.parse(game);
+    }),
+
+  endGame: procedure
+    .input(
+      z.object({ gameId: z.string(), result: z.string(), playerId: z.string() })
+    )
+    .mutation(async ({ input }) => {
+      const { gameId, result, playerId } = input;
+      const [game] = await sql`
+        UPDATE
+          games
+        SET
+          is_over = true,
+          result = ${result},
+          winner_id = ${playerId}
         WHERE
           games.id = ${gameId}
       `;

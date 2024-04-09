@@ -34,7 +34,7 @@ export const GamePage = observer(({ gameId }: GameProps) => {
             <Link href={`/user/${playerO?.id}`}>{playerO?.name}</Link>
           </UserRow>
 
-          {winner && <Result>{winner.symbol} Wins</Result>}
+          {winner && <Result>{winner} Wins</Result>}
         </GameDetails>
 
         <MovesList>
