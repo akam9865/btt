@@ -78,7 +78,21 @@ const UserRow = styled("div")(({ theme }) => ({
 const Container = styled("div")(({ theme }) => ({
   display: "flex",
   gap: 16,
-  height: 600,
+
+  [theme.breakpoints.up("xs")]: {
+    flexDirection: "column",
+  },
+
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: 600,
+    margin: "auto",
+  },
+
+  [theme.breakpoints.up("md")]: {
+    maxWidth: "unset",
+    height: 600,
+    flexDirection: "row",
+  },
 }));
 
 const GameDetails = styled("div")(({ theme }) => ({
@@ -96,6 +110,10 @@ const MovesList = styled("div")(({ theme }) => ({
   boxShadow: "0 0 12px rgba(0, 0, 0, 0.1)",
   minHeight: 0,
   overflow: "auto",
+
+  [theme.breakpoints.down("md")]: {
+    width: "100%",
+  },
 }));
 
 const MoveRow = styled("div")({
@@ -117,9 +135,13 @@ const MoveNumber = styled("div")(({ theme }) => ({
   width: "40px",
 }));
 
-const SidePanel = styled("div")({
+const SidePanel = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: 16,
   width: 350,
-});
+
+  [theme.breakpoints.down("md")]: {
+    width: "100%",
+  },
+}));

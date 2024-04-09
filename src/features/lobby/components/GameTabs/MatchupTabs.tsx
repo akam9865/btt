@@ -60,5 +60,5 @@ const TabsContainer = styled("div")(({ theme }) => ({
   flexGrow: 1,
   display: "flex",
   flexDirection: "column",
-  minHeight: 0,
+  minHeight: 200,
 }));

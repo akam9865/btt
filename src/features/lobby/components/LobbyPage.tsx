@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { styled } from "@mui/material";
+import { Box, styled } from "@mui/material";
 import { lobbyStore } from "@/stores/lobby";
 import { MatchupsTabs } from "./GameTabs/MatchupTabs";
 import { GameBoard } from "@/features/game/components/GameBoard";
@@ -29,7 +29,9 @@ export const LobbyPage = observer(() => {
 
   return (
     <Container>
-      <GameBoard game={blankGame} />
+      <Box sx={{ display: { xs: "none", sm: "block" } }}>
+        <GameBoard game={blankGame} />
+      </Box>
       <SidePanel>
         <MatchupsTabs />
         <Rules>
@@ -56,15 +58,31 @@ export const LobbyPage = observer(() => {
 const Container = styled("div")(({ theme }) => ({
   display: "flex",
   gap: 16,
-  height: 600,
+
+  [theme.breakpoints.up("xs")]: {
+    flexDirection: "column",
+  },
+
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: 600,
+    margin: "auto",
+  },
+
+  [theme.breakpoints.up("md")]: {
+    maxWidth: "unset",
+    flexDirection: "row",
+  },
 }));
 
-const SidePanel = styled("div")({
+const SidePanel = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   gap: 16,
   width: 350,
-});
+  [theme.breakpoints.down("md")]: {
+    width: "100%",
+  },
+}));
 
 const Rules = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,

@@ -51,13 +51,16 @@ const Header = styled("div")(({ theme }) => ({
 }));
 
 const Content = styled("div")(({ theme }) => ({
-  [theme.breakpoints.up("md")]: {
-    margin: "0 auto",
-    flexGrow: 1,
-  },
   [theme.breakpoints.down("sm")]: {
     display: "flex",
     flexDirection: "column",
     padding: 12,
+    paddingBottom: 64,
+    overflow: "auto",
+  },
+
+  [theme.breakpoints.up("md")]: {
+    margin: "0 auto",
+    flexGrow: 1,
   },
 }));
