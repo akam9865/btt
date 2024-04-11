@@ -11,7 +11,7 @@ export const PageLayout = observer(
     return (
       <>
         <Head>
-          <title>BTT</title>
+          <title>MegaTacToe</title>
           <meta name="description" content="A game" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.png" />

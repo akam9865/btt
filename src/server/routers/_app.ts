@@ -116,7 +116,8 @@ export const appRouter = router({
     )
     .mutation(async ({ input }) => {
       const { gameId, result, playerId } = input;
-      const [game] = await sql`
+
+      await sql`
         UPDATE
           games
         SET
@@ -127,7 +128,7 @@ export const appRouter = router({
           games.id = ${gameId}
       `;
 
-      return GameSchema.parse(game);
+      // TODO: something on failure
     }),
 
   getMoves: procedure
