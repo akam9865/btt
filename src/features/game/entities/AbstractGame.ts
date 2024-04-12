@@ -146,7 +146,7 @@ export abstract class AbstractGame {
   }
 
   abstract loadGame(): void;
-  abstract move(playerId: string, position: Position): void;
+  abstract move(position: Position, playerId?: string): void;
   abstract get playerX(): User | undefined;
   abstract get playerO(): User | undefined;
 }

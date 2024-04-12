@@ -1,3 +1,4 @@
+import assert from "assert";
 import { AbstractGame, Position } from "./AbstractGame";
 
 export class LocalGame extends AbstractGame {
@@ -18,8 +19,14 @@ export class LocalGame extends AbstractGame {
     return this.availableBoards.includes(position.bigBoardIndex);
   }
 
-  move(playerId: string, position: Position) {
-    this.applyMove({ position, symbol: this.turnSymbol, playerId });
+  move(position: Position) {
+    assert(this.turnPlayerId);
+
+    this.applyMove({
+      position,
+      symbol: this.turnSymbol,
+      playerId: this.turnPlayerId,
+    });
   }
 
   get playerO(): any {
