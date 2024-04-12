@@ -31,18 +31,18 @@ export const CreateGamePanel = observer(() => {
           size={"small"}
           onClick={() => handleCreateGame("X")}
         >
-          Start Game as X
+          Play as X
         </Button>
         <Button
           variant={"outlined"}
           size={"small"}
           onClick={() => handleCreateGame("O")}
         >
-          Start Game as O
+          Play as O
         </Button>
         <Link href="/game/local">
           <Button variant={"outlined"} size={"small"}>
-            Start Local Game
+            Play Local
           </Button>
         </Link>
       </ButtonsContainer>
