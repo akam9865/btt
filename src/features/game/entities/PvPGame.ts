@@ -25,12 +25,13 @@ export class PvPGame extends AbstractGame {
     return usersStore.get(this.playerOId);
   }
 
-  move = flow(function* (this: PvPGame, playerId: string, position: Position) {
+  move = flow(function* (this: PvPGame, position: Position, playerId?: string) {
     const { gameId, turnPlayerId } = this;
     const moveSymbol = this.turnSymbol;
     const { bigBoardIndex, littleBoardIndex } = position;
     const existingSymbol = this.symbolAtPosition(position);
 
+    assert(playerId, "playerId required");
     assert(turnPlayerId === playerId, "not your turn");
     assert(existingSymbol === null, "occupied cell");
     assert(gameId, "gameId required");

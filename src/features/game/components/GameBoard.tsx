@@ -84,9 +84,7 @@ const GameCell = observer(
 
     const handleClick = () => {
       if (!canClick) return;
-      if (!userId) return;
-
-      game.move(userId, position);
+      game.move(position, userId);
     };
 
     return (

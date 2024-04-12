@@ -13,7 +13,11 @@ export const GamePage = observer(({ gameId }: GameProps) => {
   const { createdAt, playerX, playerO, winner, formattedMoves } = game || {};
 
   useEffect(() => {
-    gamesStore.loadGame(gameId);
+    if (gameId === "local") {
+      gamesStore.createLocalGame();
+    } else {
+      gamesStore.createPvPGame(gameId);
+    }
   }, [gameId]);
 
   return (
