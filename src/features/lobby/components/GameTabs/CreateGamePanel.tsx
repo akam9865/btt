@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 import { Button, styled } from "@mui/material";
 import { useUserId } from "@/hooks/useUserId";
+import Link from "next/link";
 
 export const CreateGamePanel = observer(() => {
   const mutation = trpc.createGame.useMutation();
@@ -39,6 +40,11 @@ export const CreateGamePanel = observer(() => {
         >
           Start Game as O
         </Button>
+        <Link href="/game/local">
+          <Button variant={"outlined"} size={"small"}>
+            Start Local Game
+          </Button>
+        </Link>
       </ButtonsContainer>
     </CreateContainer>
   );

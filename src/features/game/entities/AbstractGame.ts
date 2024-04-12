@@ -1,5 +1,6 @@
 import { joinPosition } from "@/features/game/utils/utils";
 import { type Move } from "@/utils/schema/MovesSchema";
+import { User } from "@/utils/schema/UserSchema";
 import { action, computed, makeObservable, observable } from "mobx";
 
 // A board will be a 1d array with 9 elements.
@@ -110,13 +111,14 @@ export abstract class AbstractGame {
 
   canClick(position: Position, playerId?: string) {
     if (!playerId) return false;
+    if (playerId !== this.turnPlayerId) return false;
+
     if (this.winner) return false;
 
     const board = this.smartBoard[position.bigBoardIndex];
 
     if (board.board[position.littleBoardIndex].symbol) return false;
     if (board.isOver) return false;
-    if (playerId !== this.turnPlayerId) return false;
 
     return this.availableBoards.includes(position.bigBoardIndex);
   }
@@ -145,8 +147,8 @@ export abstract class AbstractGame {
 
   abstract loadGame(): void;
   abstract move(playerId: string, position: Position): void;
-  abstract get playerX(): any;
-  abstract get playerO(): any;
+  abstract get playerX(): User | undefined;
+  abstract get playerO(): User | undefined;
 }
 
 type Symbol = "X" | "O" | null;
