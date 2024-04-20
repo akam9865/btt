@@ -2,6 +2,7 @@ import { PvPGame } from "@/features/game/entities/PvPGame";
 import { AbstractGame } from "@/features/game/entities/AbstractGame";
 import { makeAutoObservable } from "mobx";
 import { LocalGame } from "@/features/game/entities/LocalGame";
+import { ComputerGame } from "@/features/game/entities/ComputerGame";
 
 class GamesStore {
   games: AbstractGame[] = [];
@@ -30,6 +31,12 @@ class GamesStore {
 
   createLocalGame() {
     const game = new LocalGame("local");
+    this.games.push(game);
+    return game;
+  }
+
+  createComputerGame() {
+    const game = new ComputerGame("computer");
     this.games.push(game);
     return game;
   }

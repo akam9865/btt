@@ -45,6 +45,11 @@ export const CreateGamePanel = observer(() => {
             Play Local
           </Button>
         </Link>
+        <Link href="/game/computer">
+          <Button variant={"outlined"} size={"small"}>
+            Play Computer
+          </Button>
+        </Link>
       </ButtonsContainer>
     </CreateContainer>
   );

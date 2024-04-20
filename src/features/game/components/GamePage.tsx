@@ -13,7 +13,9 @@ export const GamePage = observer(({ gameId }: GameProps) => {
   const { createdAt, playerX, playerO, winner, formattedMoves } = game || {};
 
   useEffect(() => {
-    if (gameId === "local") {
+    if (gameId === "computer") {
+      gamesStore.createComputerGame();
+    } else if (gameId === "local") {
       gamesStore.createLocalGame();
     } else {
       gamesStore.createPvPGame(gameId);

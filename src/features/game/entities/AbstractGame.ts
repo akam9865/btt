@@ -109,6 +109,17 @@ export abstract class AbstractGame {
     return formattedMoves;
   }
 
+  get availableMoves(): Position[] {
+    return this.availableBoards.flatMap((boardIndex) => {
+      const board = this.smartBoard[boardIndex];
+      if (board.isOver) return [];
+
+      return board.board
+        .filter((cell) => !cell.symbol)
+        .map((cell) => cell.position);
+    });
+  }
+
   canClick(position: Position, playerId?: string) {
     if (!playerId) return false;
     if (playerId !== this.turnPlayerId) return false;
@@ -180,6 +191,12 @@ export class TicTacToe {
     if (this.winner) return true;
     if (this.board.every((cell) => cell.symbol)) return true;
     return false;
+  }
+
+  get availableMoves() {
+    return this.board
+      .filter((cell) => !cell.symbol)
+      .map((cell) => cell.position.littleBoardIndex);
   }
 
   canMove() {}

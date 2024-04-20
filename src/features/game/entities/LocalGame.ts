@@ -1,5 +1,6 @@
 import assert from "assert";
 import { AbstractGame, Position } from "./AbstractGame";
+import { User } from "@/utils/schema/UserSchema";
 
 export class LocalGame extends AbstractGame {
   constructor(gameId: string) {
@@ -29,12 +30,13 @@ export class LocalGame extends AbstractGame {
     });
   }
 
-  get playerO(): any {
-    return { id: "123", name: "Orenthal" };
+  // TODO: use real images for local players
+  get playerO(): User {
+    return { id: "123", name: "Orenthal", image: "" };
   }
 
-  get playerX(): any {
-    return { id: "123", name: "Xerxes" };
+  get playerX(): User {
+    return { id: "123", name: "Xerxes", image: "" };
   }
 
   loadGame(): void {}
