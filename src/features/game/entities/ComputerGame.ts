@@ -1,9 +1,11 @@
 import { User } from "@/utils/schema/UserSchema";
-import { AbstractGame, BigBoard, Position } from "./AbstractGame";
-import { Move } from "@/utils/schema/MovesSchema";
+import { AbstractGame, Position } from "./AbstractGame";
+import { MinimaxGame } from "./MinimaxGame";
+import { megaMinimaxV2 } from "../utils/ai/megaMinimaxV2";
 
 export class ComputerGame extends AbstractGame {
   computerSymbol: "X" | "O";
+  isThinking: boolean = false; // make this a more generic indicator of whos turn it is
 
   constructor(gameId: string, private playerSymbol: "X" | "O" = "X") {
     super(gameId);
@@ -23,49 +25,48 @@ export class ComputerGame extends AbstractGame {
     return this.availableBoards.includes(position.bigBoardIndex);
   }
 
-  move(position: Position, playerId: string) {
+  move(position: Position, playerId: string = "dave") {
     this.applyMove({ position, playerId, symbol: this.turnSymbol });
 
+    // run in new thread
     setTimeout(() => {
-      const computerMove = this.pickRandomMove();
-      this.applyMove(computerMove);
-    }, 1);
+      this.computerMove();
+    });
   }
 
-  private pickRandomMove(): Move {
-    const availablePositions = this.availableMoves;
-    const index = Math.floor(Math.random() * availablePositions.length);
+  computerMove() {
+    if (this.isOver) return;
+    const computerMove = this.pickBestOrRandomMove();
 
-    return {
-      position: availablePositions[index],
-      playerId: "123",
+    this.applyMove({
+      position: computerMove,
+      playerId: "dblue",
       symbol: this.computerSymbol,
-    };
+    });
+  }
+
+  private pickBestOrRandomMove(): Position {
+    const minimaxGame = new MinimaxGame("mini", this.moves);
+    this.isThinking = true;
+    const move = megaMinimaxV2(minimaxGame, 0, true);
+    this.isThinking = false;
+
+    if (move.score === 0 || !move.position) {
+      return this.availableMoves[
+        Math.floor(Math.random() * this.availableMoves.length)
+      ];
+    }
+
+    return move.position;
   }
 
   get playerO(): User {
-    return { id: "123", name: "Deep Blue", image: "" };
+    return { id: "dblue", name: "Deep Blue", image: "" };
   }
 
   get playerX(): User {
-    return { id: "123", name: "Dave", image: "" };
+    return { id: "dave", name: "Dave", image: "" };
   }
 
   loadGame(): void {}
 }
-
-function pickRandomPosition(board: BigBoard): Move {
-  const yolo = board.flatMap((tt) => {
-    if (tt.isOver) return [];
-
-    return tt.board.flatMap((c) => {
-      if (!c.symbol) return [c.position];
-      return [];
-    });
-  });
-
-  const index = Math.floor(Math.random() * yolo.length);
-  return { position: yolo[index], playerId: "123", symbol: "O" };
-  //   return yolo.map();
-}
-import "../utils/minimax2";

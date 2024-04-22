@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Board, Player, minimax } from "./ticTacToeMinimax";
+import { Board, Player, minimax } from "../ticTacToeMinimax";
 
 describe("minmax", () => {
   test("X simple win", () => {
